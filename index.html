@@ -1,0 +1,3258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>⚫ Lea's Shop · Emo Cyber</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ===== RESET & BASE — Black & Grey Emo Theme ===== */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f0f12;
+            --bg-card: rgba(20, 20, 25, 0.85);
+            --bg-modal: #1a1a1f;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9a9a9a;
+            --text-dim: #666;
+            --border-color: #333;
+            --border-light: #444;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --accent-grey: #888;
+            --glow-grey: 0 0 20px rgba(100, 100, 100, 0.1);
+            --border-radius: 12px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+            --price-green: #66dd66;
+            --price-green-glow: rgba(102, 221, 102, 0.15);
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            font-family: 'Exo 2', 'Segoe UI', sans-serif;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: auto;
+        }
+
+        /* ===== MATRIX CANVAS ===== */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.08;
+        }
+
+        /* ===== BG ORBS ===== */
+        .bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bg-canvas .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.06;
+            animation: orbFloat 20s ease-in-out infinite alternate;
+        }
+        .bg-canvas .glow-orb.orb1 {
+            width: 400px;
+            height: 400px;
+            top: -10%;
+            right: -5%;
+            background: #444;
+            animation-delay: 0s;
+        }
+        .bg-canvas .glow-orb.orb2 {
+            width: 350px;
+            height: 350px;
+            bottom: -10%;
+            left: -5%;
+            background: #333;
+            animation-delay: -7s;
+        }
+        .bg-canvas .glow-orb.orb3 {
+            width: 300px;
+            height: 300px;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222;
+            animation-delay: -14s;
+            opacity: 0.04;
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -25px) scale(1.05); }
+            66% { transform: translate(-25px, 30px) scale(0.95); }
+            100% { transform: translate(15px, -15px) scale(1.02); }
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #loading-screen img {
+            max-width: 180px;
+            width: 50%;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(100, 100, 100, 0.2));
+            animation: loadPulse 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes loadPulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(100, 100, 100, 0.2)); }
+            100% { transform: scale(1.04); filter: drop-shadow(0 0 40px rgba(100, 100, 100, 0.3)); }
+        }
+
+        /* ===== INTRO OVERLAY ===== */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(15, 15, 18, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            padding: 20px;
+        }
+        #intro-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #intro-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #intro-overlay h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5rem, 7vw, 4.5rem);
+            font-weight: 900;
+            color: #ccc;
+            text-shadow: 0 0 40px rgba(150, 150, 150, 0.1);
+            text-align: center;
+            letter-spacing: 3px;
+            line-height: 1.2;
+        }
+        #intro-overlay .sub-lea {
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+            color: var(--text-secondary);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 300;
+            opacity: 0.6;
+        }
+        #intro-overlay .sub-lea span {
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .intro-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+        }
+        .intro-btn {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: clamp(1rem, 2vw, 1.6rem);
+            padding: 16px 40px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            background: rgba(50, 50, 50, 0.1);
+            color: #ccc;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-shadow: 0 0 20px rgba(150, 150, 150, 0.05);
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            letter-spacing: 2px;
+            backdrop-filter: blur(4px);
+            min-width: 180px;
+        }
+        .intro-btn:hover {
+            background: rgba(80, 80, 80, 0.2);
+            box-shadow: 0 0 40px rgba(100, 100, 100, 0.1);
+            transform: scale(1.04);
+            border-color: #888;
+            color: #fff;
+        }
+        .intro-btn:active {
+            transform: scale(0.95);
+        }
+        .intro-btn.mm2 {
+            border-color: #555;
+        }
+        .intro-btn.mm2:hover {
+            border-color: #999;
+        }
+        .intro-btn .icon {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        /* --- Roblox button in intro --- */
+        .intro-btn.roblox-btn {
+            border-color: #664444;
+            background: rgba(80, 60, 60, 0.15);
+            color: #cc7777;
+            min-width: 200px;
+            animation: glowPulseBorder 2s ease-in-out infinite;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            transition: none;
+        }
+        .intro-btn.roblox-btn:hover {
+            background: rgba(100, 70, 70, 0.25);
+            border-color: #aa5555;
+            color: #ff8888;
+            transform: scale(1.04);
+        }
+        .intro-btn.roblox-btn .icon {
+            font-size: 1.2em;
+        }
+        @keyframes glowPulseBorder {
+            0%, 100% { border-color: #664444; box-shadow: 0 0 10px rgba(100, 60, 60, 0.1); }
+            50% { border-color: #aa5555; box-shadow: 0 0 25px rgba(150, 80, 80, 0.2); }
+        }
+
+        /* --- Flying Roblox button animation --- */
+        .intro-btn.roblox-btn.flying {
+            position: fixed;
+            z-index: 2000;
+            animation: none;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            margin: 0;
+            border-color: #aa5555;
+            box-shadow: 0 0 40px rgba(200, 80, 80, 0.3);
+        }
+        .intro-btn.roblox-btn.flying-done {
+            position: fixed;
+            z-index: 2000;
+            pointer-events: none;
+            margin: 0;
+            animation: glowShake 1.2s ease forwards;
+            border-color: #ff6666;
+            box-shadow: 0 0 60px rgba(255, 80, 80, 0.4), 0 0 120px rgba(255, 50, 50, 0.15);
+        }
+        @keyframes glowShake {
+            0% { transform: scale(1); box-shadow: 0 0 60px rgba(255, 80, 80, 0.5); }
+            10% { transform: scale(1.08); box-shadow: 0 0 80px rgba(255, 80, 80, 0.6); }
+            20% { transform: scale(0.95) rotate(-2deg); box-shadow: 0 0 70px rgba(255, 80, 80, 0.5); }
+            30% { transform: scale(1.05) rotate(2deg); box-shadow: 0 0 90px rgba(255, 80, 80, 0.6); }
+            40% { transform: scale(0.98) rotate(-1deg); box-shadow: 0 0 60px rgba(255, 80, 80, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 0 70px rgba(255, 80, 80, 0.5); }
+            60% { transform: scale(1); box-shadow: 0 0 50px rgba(255, 80, 80, 0.3); }
+            80% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 80, 80, 0.15); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(100, 60, 60, 0.1); }
+        }
+        .intro-btn.roblox-btn.flying-done .icon {
+            animation: iconPop 0.6s ease forwards;
+        }
+        @keyframes iconPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* Hide other intro buttons during animation */
+        .intro-btn.hide-btn {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* Header button glow during animation */
+        .social-link.roblox-link.glow-header {
+            animation: headerGlow 1.2s ease forwards;
+            border-color: #ff6666 !important;
+            box-shadow: 0 0 60px rgba(255, 80, 80, 0.3) !important;
+        }
+        @keyframes headerGlow {
+            0% { box-shadow: 0 0 60px rgba(255, 80, 80, 0.4); border-color: #ff6666; }
+            30% { box-shadow: 0 0 80px rgba(255, 80, 80, 0.5); border-color: #ff6666; transform: scale(1.05); }
+            60% { box-shadow: 0 0 40px rgba(255, 80, 80, 0.2); border-color: #aa5555; transform: scale(0.95); }
+            100% { box-shadow: 0 0 10px rgba(100, 60, 60, 0.1); border-color: #664444; transform: scale(1); }
+        }
+
+        /* ===== LIVE ACTIVITY FEED ===== */
+        #live-feed {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+            max-width: 320px;
+            width: 100%;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: rgba(15, 15, 18, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            pointer-events: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #444 transparent;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        #live-feed::-webkit-scrollbar {
+            width: 3px;
+        }
+        #live-feed::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+        #live-feed .feed-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #2a2a2a;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #live-feed .feed-title .live-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #66aa66;
+            border-radius: 50%;
+            animation: pulseDot 1.5s ease-in-out infinite;
+            margin-left: 6px;
+        }
+        #live-feed .feed-title .toggle-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: transform 0.3s ease;
+            line-height: 1;
+        }
+        #live-feed .feed-title .toggle-btn:hover {
+            color: #ccc;
+        }
+        #live-feed .feed-title .toggle-btn.minimized {
+            transform: rotate(-90deg);
+        }
+        .feed-items-wrapper {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            max-height: 500px;
+        }
+        .feed-items-wrapper.hidden {
+            max-height: 0 !important;
+        }
+        .feed-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: slideIn 0.4s ease forwards;
+            opacity: 0;
+        }
+        .feed-item:last-child {
+            border-bottom: none;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .feed-item .user {
+            color: #ccc;
+            font-weight: 600;
+        }
+        .feed-item .action {
+            color: #888;
+        }
+        .feed-item .item {
+            color: #aaa;
+        }
+        .feed-item .price {
+            color: var(--price-green);
+            font-weight: 600;
+            margin-left: auto;
+            text-shadow: 0 0 15px var(--price-green-glow);
+        }
+        .feed-item .time {
+            font-size: 0.6rem;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        /* Mobile positioning */
+        @media (max-width: 768px) {
+            #live-feed {
+                top: auto;
+                bottom: 10px;
+                left: 10px;
+                max-width: 280px;
+                font-size: 0.65rem;
+                padding: 8px 10px;
+                max-height: 50vh;
+            }
+        }
+        @media (max-width: 480px) {
+            #live-feed {
+                max-width: 220px;
+                font-size: 0.55rem;
+                padding: 6px 8px;
+                bottom: 8px;
+                left: 8px;
+            }
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* ===== MAIN WRAPPER ===== */
+        #main-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 16px 20px 50px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            animation: fadeUp 0.9s ease 1.6s forwards;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== HEADER + SOCIAL ===== */
+        .header {
+            text-align: center;
+            padding: 12px 0 8px;
+            position: relative;
+        }
+        .header .cyber-title {
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 4.5vw, 3.2rem);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #ccc;
+            text-shadow: 0 0 30px rgba(150, 150, 150, 0.05);
+            display: inline-block;
+        }
+        .header .divider-line {
+            width: 80px;
+            height: 2px;
+            margin: 8px auto 0;
+            background: linear-gradient(90deg, transparent, #666, transparent);
+            border-radius: 4px;
+        }
+
+        .social-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .social-link {
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.65rem, 0.9vw, 0.9rem);
+            padding: 5px 16px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: rgba(30, 30, 30, 0.3);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition);
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .social-link:hover {
+            border-color: #888;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(100, 100, 100, 0.05);
+            transform: scale(1.03);
+            background: rgba(60, 60, 60, 0.2);
+        }
+        .social-link .icon {
+            font-size: 1.1em;
+        }
+        .social-link.roblox-link {
+            border-color: #664444;
+            background: rgba(80, 60, 60, 0.15);
+            position: relative;
+            animation: glowPulseBorder 2s ease-in-out infinite;
+        }
+        .social-link.roblox-link:hover {
+            border-color: #aa5555;
+            background: rgba(100, 70, 70, 0.25);
+        }
+
+        /* ===== INGAME INDICATOR (desktop) ===== */
+        .ingame-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(40, 60, 40, 0.15);
+            border: 1px solid #448844;
+            font-size: clamp(0.55rem, 0.7vw, 0.7rem);
+            font-weight: 700;
+            color: #66dd66;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: indicatorPulseGreen 1.5s ease-in-out infinite;
+            white-space: nowrap;
+            margin-left: -4px;
+        }
+        .ingame-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: #44ff44;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(68, 255, 68, 0.6);
+            animation: blinkDotGreen 0.6s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes indicatorPulseGreen {
+            0%, 100% { border-color: #448844; box-shadow: 0 0 10px rgba(68, 136, 68, 0.1); }
+            50% { border-color: #66dd66; box-shadow: 0 0 25px rgba(68, 200, 68, 0.2); }
+        }
+        @keyframes blinkDotGreen {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* ===== MOBILE INGAME INDICATOR (above My Roblox, tilted) ===== */
+        .mobile-ingame {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: -28px;
+            font-size: 0.5rem;
+            font-weight: 700;
+            color: #66dd66;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(40, 60, 40, 0.2);
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid #448844;
+            white-space: nowrap;
+            animation: tiltSway 2s ease-in-out infinite;
+        }
+        .mobile-ingame .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #44ff44;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(68, 255, 68, 0.5);
+            animation: blinkDotGreen 0.6s ease-in-out infinite;
+            margin-right: 4px;
+        }
+        @keyframes tiltSway {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        /* Mobile overrides */
+        @media (max-width: 768px) {
+            .ingame-indicator {
+                display: none !important;
+            }
+            .mobile-ingame {
+                display: inline-flex;
+                align-items: center;
+            }
+            .social-bar {
+                position: relative;
+                padding-top: 24px;
+            }
+            .social-link.roblox-link {
+                margin-top: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .ingame-indicator {
+                font-size: 0.5rem;
+                padding: 2px 8px;
+                gap: 4px;
+            }
+            .ingame-indicator .dot {
+                width: 6px;
+                height: 6px;
+            }
+            .mobile-ingame {
+                font-size: 0.45rem;
+                padding: 2px 8px;
+                top: -24px;
+                right: 2px;
+            }
+            .mobile-ingame .dot {
+                width: 5px;
+                height: 5px;
+            }
+        }
+
+        /* ===== SHOP TABS ===== */
+        .shop-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .shop-tab {
+            font-family: 'Orbitron', monospace;
+            font-weight: 600;
+            font-size: clamp(0.6rem, 1vw, 0.85rem);
+            padding: 6px 18px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .shop-tab:hover {
+            border-color: #666;
+            color: #ccc;
+        }
+        .shop-tab.active {
+            border-color: #888;
+            background: rgba(80, 80, 80, 0.15);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(100, 100, 100, 0.03);
+        }
+        .shop-tab.mm2-tab.active {
+            border-color: #999;
+            background: rgba(100, 100, 100, 0.1);
+            color: #eee;
+        }
+
+        /* ===== SHOP SECTIONS ===== */
+        .shop-section {
+            display: none;
+            margin-top: 16px;
+            animation: fadeUp 0.5s ease forwards;
+        }
+        .shop-section.active {
+            display: block;
+        }
+
+        /* ===== SEARCH & FILTER CONTROLS ===== */
+        .shop-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            background: rgba(20, 20, 25, 0.5);
+            border-radius: 10px;
+            border: 1px solid #2a2a2a;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 160px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border var(--transition);
+        }
+        .search-input:focus {
+            border-color: #666;
+        }
+        .search-input::placeholder {
+            color: rgba(160, 160, 160, 0.4);
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 5px 14px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .filter-btn:hover {
+            border-color: #666;
+            color: #ccc;
+        }
+        .filter-btn.active {
+            border-color: #888;
+            background: rgba(80, 80, 80, 0.2);
+            color: #fff;
+        }
+
+        /* ===== AGE WARNING NOTE ===== */
+        .age-warning {
+            background: rgba(60, 40, 40, 0.15);
+            border-left: 3px solid #664444;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            font-size: 0.7rem;
+            color: #886666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .age-warning .icon {
+            font-size: 1.2rem;
+        }
+        .age-warning strong {
+            color: #aa7777;
+        }
+
+        /* ===== GRID ===== */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(12px, 2vw, 24px);
+        }
+        @media (max-width: 640px) and (orientation: portrait) {
+            .grid-container {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+            }
+        }
+        @media (max-width: 820px) and (orientation: landscape) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+        @media (max-width: 520px) and (orientation: landscape) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+        }
+
+        /* ===== CARD ===== */
+        .account-card,
+        .mm2-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid #2a2a2a;
+            border-radius: var(--border-radius);
+            padding: clamp(12px, 1.6vw, 22px) clamp(8px, 1vw, 16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            cursor: default;
+        }
+        .account-card::before,
+        .mm2-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: var(--border-radius);
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(80,80,80,0.1), rgba(50,50,50,0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.3;
+            transition: opacity var(--transition);
+        }
+        .account-card:hover,
+        .mm2-card:hover {
+            transform: translateY(-3px) scale(1.01);
+            border-color: #555;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), var(--glow-grey);
+        }
+        .account-card:hover::before,
+        .mm2-card:hover::before {
+            opacity: 1;
+        }
+
+        .mm2-card .click-hint {
+            font-size: 0.45rem;
+            color: var(--text-secondary);
+            opacity: 0.3;
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+        .mm2-card:hover .click-hint {
+            opacity: 0.6;
+            color: #aaa;
+        }
+
+        .profile-wrap {
+            position: relative;
+            width: clamp(60px, 10vw, 120px);
+            height: clamp(60px, 10vw, 120px);
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .profile-wrap .glow-ring {
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(100,100,100,0.1), rgba(50,50,50,0.05), transparent 70%);
+            filter: blur(14px);
+            animation: glowPulse 3s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+        .profile-wrap .glow-ring.secondary {
+            background: radial-gradient(circle at center, rgba(80,80,80,0.08), rgba(30,30,30,0.03), transparent 70%);
+            animation-delay: -1.5s;
+            filter: blur(20px);
+            inset: -14px;
+        }
+        @keyframes glowPulse {
+            0% { opacity: 0.3; transform: scale(0.95); }
+            100% { opacity: 0.7; transform: scale(1.1); }
+        }
+        .profile-wrap img {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            transition: border var(--transition), box-shadow var(--transition);
+            background: #111;
+        }
+        .account-card:hover .profile-wrap img,
+        .mm2-card:hover .profile-wrap img {
+            border-color: #666;
+            box-shadow: 0 0 40px rgba(100,100,100,0.1);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 0.9vw, 1rem);
+            color: var(--text-primary);
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+            text-shadow: 0 0 15px rgba(150,150,150,0.03);
+            line-height: 1.3;
+        }
+        .card-sub {
+            font-size: clamp(0.45rem, 0.65vw, 0.7rem);
+            color: var(--price-green);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 1px;
+            text-shadow: 0 0 15px var(--price-green-glow);
+        }
+        .card-badge {
+            display: inline-block;
+            font-size: 0.45rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 1px 10px;
+            border-radius: 16px;
+            margin-top: 4px;
+            background: rgba(60,60,60,0.2);
+            border: 1px solid #333;
+            color: #aaa;
+            text-shadow: 0 0 10px rgba(150,150,150,0.03);
+        }
+
+        /* Price in card - green */
+        .price-green {
+            color: var(--price-green);
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--price-green-glow);
+        }
+
+        /* --- Reviews --- */
+        .reviews {
+            margin-top: 10px;
+            width: 100%;
+            text-align: left;
+            border-top: 1px solid #282828;
+            padding-top: 8px;
+        }
+        .review-item {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        .review-item .review-user {
+            color: #aaa;
+            font-weight: 600;
+        }
+        .review-item .review-stars {
+            color: #886622;
+            letter-spacing: 1px;
+        }
+        .review-item .review-text {
+            font-style: italic;
+            color: #888;
+            font-size: 0.55rem;
+            line-height: 1.3;
+        }
+
+        /* ===== CARD ACTIONS ===== */
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .card-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.5rem, 0.7vw, 0.75rem);
+            letter-spacing: 0.3px;
+            padding: 7px 4px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            width: 100%;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-actions .btn-profile {
+            background: rgba(60,60,60,0.1);
+            border: 1px solid #333;
+            color: #aaa;
+        }
+        .card-actions .btn-profile:hover {
+            background: rgba(80,80,80,0.2);
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .card-actions .btn-buy {
+            background: rgba(80,80,80,0.1);
+            border: 1px solid #444;
+            color: #ccc;
+        }
+        .card-actions .btn-buy:hover {
+            background: rgba(100,100,100,0.2);
+            border-color: #777;
+            box-shadow: 0 0 20px rgba(100,100,100,0.06);
+            transform: scale(1.02);
+        }
+        .card-actions .btn-robux {
+            background: rgba(60,60,60,0.08);
+            border: 1px solid #333;
+            color: #888;
+        }
+        .card-actions .btn-robux:hover {
+            background: rgba(80,80,80,0.15);
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .card-actions .btn-dm {
+            background: rgba(60,60,60,0.08);
+            border: 1px solid #333;
+            color: #888;
+        }
+        .card-actions .btn-dm:hover {
+            background: rgba(80,80,80,0.15);
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .card-actions .btn:active {
+            transform: scale(0.95) !important;
+        }
+        .card-actions .btn .icon {
+            font-size: 1em;
+            line-height: 1;
+        }
+
+        /* Mobile: bigger buttons */
+        @media (max-width: 640px) {
+            .card-actions .btn {
+                font-size: clamp(0.6rem, 2.5vw, 0.85rem);
+                padding: 10px 6px;
+                border-radius: 8px;
+            }
+            .btn-row .btn {
+                font-size: clamp(0.55rem, 2.2vw, 0.75rem);
+                padding: 10px 4px;
+            }
+            .shop-tab {
+                font-size: clamp(0.6rem, 2vw, 0.8rem);
+                padding: 8px 16px;
+            }
+            .filter-btn {
+                font-size: clamp(0.55rem, 2vw, 0.75rem);
+                padding: 8px 14px;
+            }
+            .search-input {
+                font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+                padding: 10px 14px;
+            }
+            .shop-controls {
+                gap: 8px;
+                padding: 8px 10px;
+            }
+            .intro-btn {
+                font-size: clamp(0.8rem, 3.5vw, 1.2rem);
+                padding: 14px 28px;
+                min-width: 140px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-actions .btn {
+                font-size: clamp(0.55rem, 2.8vw, 0.8rem);
+                padding: 8px 4px;
+            }
+            .btn-row .btn {
+                font-size: clamp(0.5rem, 2.5vw, 0.7rem);
+                padding: 8px 4px;
+            }
+            .shop-tab {
+                font-size: clamp(0.55rem, 2.5vw, 0.75rem);
+                padding: 6px 12px;
+            }
+            .filter-btn {
+                font-size: clamp(0.5rem, 2.2vw, 0.7rem);
+                padding: 6px 10px;
+            }
+        }
+
+        /* Two‑button row for accounts */
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+        }
+        .btn-row .btn {
+            flex: 1;
+            padding: 7px 2px;
+            font-size: clamp(0.45rem, 0.6vw, 0.65rem);
+        }
+        .btn-row .btn-info {
+            background: rgba(40,40,40,0.15);
+            border: 1px solid #333;
+            color: #999;
+        }
+        .btn-row .btn-info:hover {
+            background: rgba(60,60,60,0.25);
+            border-color: #666;
+            color: #ccc;
+        }
+
+        /* ===== INFO MODAL (for account details) ===== */
+        #info-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 6000;
+            background: rgba(10,10,12,0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+            cursor: default;
+        }
+        #info-modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .info-box {
+            background: #1a1a1f;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: clamp(20px, 3vw, 36px);
+            max-width: 640px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .info-box h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.2rem, 2vw, 1.6rem);
+            color: #ccc;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        .info-box .info-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color var(--transition);
+            line-height: 1;
+        }
+        .info-box .info-close:hover {
+            color: #fff;
+        }
+        .info-box .info-content {
+            color: var(--text-secondary);
+            font-size: clamp(0.8rem, 0.9vw, 0.95rem);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Exo 2', sans-serif;
+        }
+        .info-box .info-content .txt-loading {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .info-box .info-content .txt-error {
+            color: #886666;
+            text-align: center;
+            padding: 20px 0;
+            white-space: normal;
+        }
+        .info-box .info-content .txt-error .hint {
+            display: block;
+            margin-top: 10px;
+            color: #888;
+            font-size: 0.85rem;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            text-align: left;
+        }
+        .info-box .info-content .txt-error .hint code {
+            background: #222;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #ccc;
+            font-size: 0.75rem;
+        }
+
+        /* ===== ACCOUNT PURCHASE MODAL ===== */
+        #account-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background: rgba(10,10,12,0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+            cursor: default;
+        }
+        #account-modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .account-modal-box {
+            background: #1a1a1f;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: clamp(24px, 3vw, 36px);
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 0 60px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .account-modal-box h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            font-weight: 700;
+            color: #ccc;
+            text-shadow: 0 0 20px rgba(150,150,150,0.05);
+            margin-bottom: 6px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .account-modal-box .modal-item-name {
+            color: #aaa;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.85rem, 1.2vw, 1rem);
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .account-modal-box .modal-view {
+            display: none;
+            animation: fadeUp 0.35s ease forwards;
+        }
+        .account-modal-box .modal-view.active {
+            display: block;
+        }
+
+        .account-modal-box .modal-view label {
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 400;
+            font-size: clamp(0.75rem, 0.9vw, 0.95rem);
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .account-modal-box .modal-view input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(0.8rem, 1vw, 1rem);
+            transition: border var(--transition), box-shadow var(--transition);
+            outline: none;
+            cursor: text;
+        }
+        .account-modal-box .modal-view input:focus {
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+        }
+        .account-modal-box .modal-view input::placeholder {
+            color: rgba(160,160,160,0.3);
+        }
+
+        .account-modal-box .modal-view .btn {
+            padding: 10px 28px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.7rem, 0.85vw, 0.9rem);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.5px;
+            margin-top: 16px;
+            width: 100%;
+        }
+        .account-modal-box .modal-view .btn-confirm {
+            background: rgba(80,80,80,0.15);
+            border: 1px solid #444;
+            color: #ccc;
+        }
+        .account-modal-box .modal-view .btn-confirm:hover {
+            background: rgba(100,100,100,0.25);
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .account-modal-box .modal-view .btn-confirm:active {
+            transform: scale(0.97);
+        }
+        .account-modal-box .modal-view .btn-confirm:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .account-modal-box .confirm-box {
+            background: rgba(40,40,40,0.1);
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin: 10px 0 14px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+        }
+        .account-modal-box .confirm-box .confirm-email {
+            font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+            color: #ddd;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            word-break: break-all;
+        }
+        .account-modal-box .confirm-box .confirm-account {
+            font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+            color: #aaa;
+            margin-top: 6px;
+        }
+
+        .account-modal-box .confirm-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .account-modal-box .confirm-actions .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.65rem, 0.8vw, 0.85rem);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.5px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .account-modal-box .confirm-actions .btn-back {
+            background: rgba(60,60,60,0.1);
+            border: 1px solid #333;
+            color: var(--text-secondary);
+        }
+        .account-modal-box .confirm-actions .btn-back:hover {
+            background: rgba(80,80,80,0.2);
+            box-shadow: 0 0 15px rgba(100,100,100,0.03);
+        }
+        .account-modal-box .confirm-actions .btn-yes {
+            background: rgba(80,80,80,0.15);
+            border: 1px solid #555;
+            color: #ccc;
+        }
+        .account-modal-box .confirm-actions .btn-yes:hover {
+            background: rgba(100,100,100,0.25);
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .account-modal-box .confirm-actions .btn-yes:active {
+            transform: scale(0.97);
+        }
+        .account-modal-box .confirm-actions .btn-yes:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .account-modal-box .modal-success {
+            text-align: center;
+            padding: 20px 0 10px;
+        }
+        .account-modal-box .modal-success .success-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 8px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .account-modal-box .modal-success h4 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1rem, 1.4vw, 1.3rem);
+            color: #aaa;
+            text-shadow: 0 0 20px rgba(150,150,150,0.05);
+        }
+        .account-modal-box .modal-success p {
+            color: var(--text-secondary);
+            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+        .account-modal-box .modal-success .warning-text {
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: rgba(60, 50, 20, 0.15);
+            border-left: 3px solid #ccaa44;
+            border-radius: 6px;
+            font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+            color: #bbaa66;
+            text-align: left;
+        }
+        .account-modal-box .modal-success .warning-text strong {
+            color: #ddcc77;
+        }
+        .account-modal-box .modal-success .btn-close-success {
+            margin-top: 16px;
+            padding: 10px 32px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: rgba(40,40,40,0.1);
+            color: #aaa;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .account-modal-box .modal-success .btn-close-success:hover {
+            background: rgba(60,60,60,0.2);
+            border-color: #666;
+            color: #eee;
+        }
+
+        /* ===== MM2 MODAL ===== */
+        #mm2-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background: rgba(10,10,12,0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+            cursor: default;
+        }
+        #mm2-modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .mm2-modal-box {
+            background: #1a1a1f;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: clamp(24px, 3vw, 36px);
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 0 60px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .mm2-modal-box h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            font-weight: 700;
+            color: #ccc;
+            text-shadow: 0 0 20px rgba(150,150,150,0.05);
+            margin-bottom: 6px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .mm2-modal-box .modal-item-name {
+            color: #aaa;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.85rem, 1.2vw, 1rem);
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .mm2-modal-box .modal-view {
+            display: none;
+            animation: fadeUp 0.35s ease forwards;
+        }
+        .mm2-modal-box .modal-view.active {
+            display: block;
+        }
+        .mm2-modal-box .modal-view label {
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 400;
+            font-size: clamp(0.75rem, 0.9vw, 0.95rem);
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .mm2-modal-box .modal-view input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(0.8rem, 1vw, 1rem);
+            transition: border var(--transition), box-shadow var(--transition);
+            outline: none;
+            cursor: text;
+        }
+        .mm2-modal-box .modal-view input:focus {
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+        }
+        .mm2-modal-box .modal-view input::placeholder {
+            color: rgba(160,160,160,0.3);
+        }
+        .mm2-modal-box .modal-view .bot-info {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(40,40,40,0.1);
+            border-left: 3px solid #555;
+            font-size: clamp(0.6rem, 0.7vw, 0.75rem);
+            color: var(--text-secondary);
+            line-height: 1.5;
+            text-align: left;
+        }
+        .mm2-modal-box .modal-view .bot-info strong {
+            color: #aaa;
+        }
+        .mm2-modal-box .modal-view .btn {
+            padding: 10px 28px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.7rem, 0.85vw, 0.9rem);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.5px;
+            margin-top: 16px;
+            width: 100%;
+        }
+        .mm2-modal-box .modal-view .btn-confirm {
+            background: rgba(80,80,80,0.15);
+            border: 1px solid #444;
+            color: #ccc;
+        }
+        .mm2-modal-box .modal-view .btn-confirm:hover {
+            background: rgba(100,100,100,0.25);
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .mm2-modal-box .modal-view .btn-confirm:active {
+            transform: scale(0.97);
+        }
+        .mm2-modal-box .modal-view .btn-confirm:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .mm2-modal-box .confirm-box {
+            background: rgba(40,40,40,0.1);
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin: 10px 0 14px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+        }
+        .mm2-modal-box .confirm-box .confirm-username {
+            font-size: clamp(1.2rem, 1.5vw, 1.6rem);
+            color: #ddd;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .mm2-modal-box .confirm-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .mm2-modal-box .confirm-actions .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.65rem, 0.8vw, 0.85rem);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.5px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .mm2-modal-box .confirm-actions .btn-back {
+            background: rgba(60,60,60,0.1);
+            border: 1px solid #333;
+            color: var(--text-secondary);
+        }
+        .mm2-modal-box .confirm-actions .btn-back:hover {
+            background: rgba(80,80,80,0.2);
+            box-shadow: 0 0 15px rgba(100,100,100,0.03);
+        }
+        .mm2-modal-box .confirm-actions .btn-yes {
+            background: rgba(80,80,80,0.15);
+            border: 1px solid #555;
+            color: #ccc;
+        }
+        .mm2-modal-box .confirm-actions .btn-yes:hover {
+            background: rgba(100,100,100,0.25);
+            box-shadow: 0 0 20px rgba(100,100,100,0.04);
+            transform: scale(1.02);
+        }
+        .mm2-modal-box .confirm-actions .btn-yes:active {
+            transform: scale(0.97);
+        }
+        .mm2-modal-box .confirm-actions .btn-yes:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .mm2-modal-box .modal-success {
+            text-align: center;
+            padding: 20px 0 10px;
+        }
+        .mm2-modal-box .modal-success .success-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 8px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .mm2-modal-box .modal-success h4 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1rem, 1.4vw, 1.3rem);
+            color: #aaa;
+            text-shadow: 0 0 20px rgba(150,150,150,0.05);
+        }
+        .mm2-modal-box .modal-success p {
+            color: var(--text-secondary);
+            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+        .mm2-modal-box .modal-success .btn-close-success {
+            margin-top: 16px;
+            padding: 10px 32px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: rgba(40,40,40,0.1);
+            color: #aaa;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .mm2-modal-box .modal-success .btn-close-success:hover {
+            background: rgba(60,60,60,0.2);
+            border-color: #666;
+            color: #eee;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 14px;
+            border-top: 1px solid #222;
+            font-size: clamp(0.5rem, 0.55vw, 0.65rem);
+            color: var(--text-secondary);
+            letter-spacing: 1.5px;
+            opacity: 0.3;
+            font-weight: 300;
+        }
+        .footer span {
+            color: #888;
+            opacity: 0.7;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            #live-feed { top: auto; bottom: 10px; left: 10px; max-width: 200px; font-size: 0.6rem; padding: 6px 8px; max-height: 40vh; }
+            #live-feed .feed-title { font-size: 0.5rem; }
+            #main-content { padding: 8px 10px 30px; }
+            .header .cyber-title { font-size: clamp(1.2rem, 6vw, 2rem); letter-spacing: 1px; }
+            .header .divider-line { width: 50px; }
+            .social-bar { gap: 8px; margin-top: 6px; flex-wrap: wrap; justify-content: center; }
+            .social-link { font-size: 0.55rem; padding: 4px 10px; border-radius: 4px; }
+            .social-link.roblox-link { font-size: 0.55rem; padding: 4px 10px; }
+            .shop-tabs { gap: 6px; margin-top: 8px; }
+            .shop-tab { font-size: 0.6rem; padding: 6px 12px; border-radius: 4px; }
+            .shop-controls { flex-direction: column; align-items: stretch; gap: 8px; }
+            .search-input { min-width: unset; font-size: 0.75rem; padding: 8px 12px; }
+            .filter-buttons { justify-content: center; }
+            .filter-btn { font-size: 0.6rem; padding: 6px 12px; }
+            .age-warning { font-size: 0.6rem; padding: 8px 12px; }
+            .profile-wrap { width: clamp(50px, 18vw, 80px); height: clamp(50px, 18vw, 80px); margin-bottom: 5px; }
+            .profile-wrap .glow-ring { inset: -4px; filter: blur(10px); }
+            .profile-wrap .glow-ring.secondary { inset: -8px; filter: blur(12px); }
+            .card-title { font-size: clamp(0.6rem, 2.8vw, 0.85rem); }
+            .card-sub { font-size: clamp(0.5rem, 2vw, 0.7rem); }
+            .card-badge { font-size: 0.4rem; padding: 2px 8px; }
+            .reviews .review-item { font-size: 0.5rem; }
+            .reviews .review-item .review-text { font-size: 0.45rem; }
+            .account-modal-box, .mm2-modal-box, .info-box { padding: 16px 14px; max-height: 95vh; }
+            .account-modal-box h3, .mm2-modal-box h3, .info-box h3 { font-size: 0.9rem; }
+            .account-modal-box .modal-item-name, .mm2-modal-box .modal-item-name { font-size: 0.8rem; }
+            .account-modal-box .modal-view input, .mm2-modal-box .modal-view input { padding: 8px 10px; font-size: 0.75rem; }
+            .account-modal-box .modal-view .btn, .mm2-modal-box .modal-view .btn { font-size: 0.7rem; padding: 10px 16px; }
+            .account-modal-box .confirm-box, .mm2-modal-box .confirm-box { padding: 10px 12px; }
+            .account-modal-box .confirm-box .confirm-email { font-size: 0.9rem; }
+            .mm2-modal-box .confirm-box .confirm-username { font-size: 1rem; }
+            .account-modal-box .confirm-actions .btn, .mm2-modal-box .confirm-actions .btn { font-size: 0.65rem; padding: 8px 12px; }
+            .footer { font-size: 0.45rem; margin-top: 16px; padding-top: 10px; }
+            .mm2-card .click-hint { font-size: 0.35rem; }
+            #intro-overlay h2 { font-size: clamp(2rem, 8vw, 3rem); }
+            #intro-overlay .intro-btn { font-size: clamp(0.8rem, 3vw, 1.2rem); padding: 12px 24px; min-width: 120px; border-radius: 6px; }
+            #intro-overlay .intro-btn.roblox-btn { font-size: clamp(0.8rem, 3vw, 1.2rem); padding: 12px 24px; min-width: 120px; }
+            .intro-buttons { gap: 14px; }
+            .btn-row { flex-direction: row; gap: 4px; }
+            .btn-row .btn { font-size: clamp(0.5rem, 2.2vw, 0.7rem); padding: 8px 4px; }
+        }
+        @media (max-width: 480px) {
+            #live-feed { max-width: 160px; font-size: 0.5rem; padding: 4px 6px; bottom: 8px; left: 8px; }
+            .profile-wrap { width: clamp(40px, 16vw, 60px); height: clamp(40px, 16vw, 60px); }
+            .card-title { font-size: clamp(0.5rem, 2.5vw, 0.7rem); }
+            .card-sub { font-size: clamp(0.45rem, 2vw, 0.6rem); }
+            .card-actions .btn { font-size: clamp(0.5rem, 2.2vw, 0.7rem); padding: 8px 4px; }
+            .shop-tab { font-size: 0.55rem; padding: 6px 10px; }
+            .social-link { font-size: 0.5rem; padding: 3px 8px; }
+            .mobile-ingame { font-size: 0.4rem; padding: 2px 6px; top: -20px; right: 2px; }
+            .account-modal-box .confirm-actions, .mm2-modal-box .confirm-actions { flex-direction: column; gap: 8px; }
+            .reviews .review-item { font-size: 0.45rem; }
+            .reviews .review-item .review-text { font-size: 0.4rem; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            #live-feed { top: auto; bottom: 8px; left: 8px; max-width: 160px; max-height: 30vh; font-size: 0.5rem; padding: 4px 6px; }
+            .header { padding: 4px 0 2px; }
+            .header .cyber-title { font-size: clamp(1rem, 3.5vw, 1.8rem); }
+            .header .divider-line { width: 50px; margin-top: 4px; }
+            .grid-container { gap: 6px; margin-top: 4px; }
+            .account-card, .mm2-card { padding: 6px 4px; border-radius: 8px; }
+            .profile-wrap { width: clamp(35px, 7vh, 55px); height: clamp(35px, 7vh, 55px); margin-bottom: 3px; }
+            .card-title { font-size: clamp(0.4rem, 1.2vh, 0.6rem); }
+            .card-sub { font-size: clamp(0.35rem, 1vh, 0.5rem); }
+            .card-actions .btn { font-size: clamp(0.4rem, 1.2vh, 0.55rem); padding: 5px 2px; }
+            .card-actions { gap: 2px; margin-top: 4px; }
+            .reviews .review-item { font-size: 0.4rem; }
+            .reviews .review-item .review-text { font-size: 0.35rem; }
+            .footer { margin-top: 8px; padding-top: 6px; font-size: 0.4rem; }
+            .shop-tabs { margin-top: 4px; gap: 4px; }
+            .shop-tab { font-size: 0.45rem; padding: 4px 10px; }
+            .social-bar { margin-top: 2px; gap: 4px; flex-wrap: wrap; }
+            .social-link { font-size: 0.4rem; padding: 2px 8px; }
+            .social-link.roblox-link { font-size: 0.4rem; padding: 2px 8px; }
+            .mobile-ingame { font-size: 0.35rem; padding: 2px 6px; top: -18px; right: 2px; }
+            .shop-controls { flex-direction: row; flex-wrap: wrap; padding: 6px 10px; }
+            .search-input { font-size: 0.55rem; padding: 4px 8px; min-width: 80px; }
+            .filter-btn { font-size: 0.45rem; padding: 3px 8px; }
+            .age-warning { font-size: 0.5rem; padding: 4px 8px; }
+            #intro-overlay .intro-btn { padding: 8px 18px; font-size: 0.8rem; min-width: 100px; }
+            #intro-overlay .intro-btn.roblox-btn { padding: 8px 18px; font-size: 0.8rem; min-width: 100px; }
+            #intro-overlay { gap: 16px; }
+            #intro-overlay h2 { font-size: clamp(1.2rem, 4vw, 2rem); }
+            .account-modal-box, .mm2-modal-box, .info-box { padding: 12px; max-height: 95vh; }
+            .account-modal-box h3, .mm2-modal-box h3, .info-box h3 { font-size: 0.8rem; margin-bottom: 2px; }
+            .account-modal-box .modal-item-name, .mm2-modal-box .modal-item-name { font-size: 0.7rem; margin-bottom: 8px; }
+            .account-modal-box .modal-view input, .mm2-modal-box .modal-view input { padding: 6px 10px; font-size: 0.7rem; }
+            .account-modal-box .modal-view .btn, .mm2-modal-box .modal-view .btn { font-size: 0.6rem; padding: 6px 12px; margin-top: 8px; }
+            .account-modal-box .confirm-box, .mm2-modal-box .confirm-box { padding: 8px 10px; margin: 6px 0 8px; }
+            .account-modal-box .confirm-box .confirm-email { font-size: 0.8rem; }
+            .mm2-modal-box .confirm-box .confirm-username { font-size: 0.8rem; }
+            .account-modal-box .confirm-actions .btn, .mm2-modal-box .confirm-actions .btn { font-size: 0.55rem; padding: 6px 10px; }
+            .btn-row .btn { font-size: 0.45rem; padding: 4px 2px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== MATRIX CANVAS ===== -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- ===== BG ORBS ===== -->
+    <div class="bg-canvas" aria-hidden="true">
+        <div class="glow-orb orb1"></div>
+        <div class="glow-orb orb2"></div>
+        <div class="glow-orb orb3"></div>
+    </div>
+
+    <!-- ===== LIVE ACTIVITY FEED ===== -->
+    <div id="live-feed">
+        <div class="feed-title">
+            <span>⚡ LIVE <span class="live-dot"></span></span>
+            <button class="toggle-btn" id="feedToggle" aria-label="Toggle feed">▼</button>
+        </div>
+        <div class="feed-items-wrapper" id="feedItemsWrapper">
+            <div id="feed-items"></div>
+        </div>
+    </div>
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loading-screen" role="status" aria-label="Loading">
+        <img src="loadingpic.gif" alt="Loading animation" />
+    </div>
+
+    <!-- ===== INTRO OVERLAY ===== -->
+    <div id="intro-overlay">
+        <div style="text-align:center;">
+            <h2>⚫ Lea's Shop</h2>
+            <div class="sub-lea"><span>✦</span> Cheap items <span>✦</span></div>
+        </div>
+        <a href="#" class="intro-btn roblox-btn" id="introRobloxBtn">
+            <span class="icon">🎮</span> My Roblox
+        </a>
+        <div class="intro-buttons" id="introButtons">
+            <button class="intro-btn mm2" id="intro-mm2">
+                <span class="icon">🔪</span> MM2 Items
+            </button>
+            <button class="intro-btn" id="intro-accounts">
+                <span class="icon">👤</span> Avatar Shop
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div id="main-content">
+
+        <!-- HEADER -->
+        <header class="header">
+            <h1 class="cyber-title">⚫ Lea's Shop</h1>
+            <div class="divider-line"></div>
+            <div class="social-bar">
+                <a href="https://www.youtube.com/@leaswxg" target="_blank" rel="noopener" class="social-link yt">
+                    <span class="icon">▶</span> YouTube
+                </a>
+                <a href="https://www.instagram.com/leaswxg/" target="_blank" rel="noopener" class="social-link ig">
+                    <span class="icon">📷</span> Instagram
+                </a>
+                <a href="https://www.roblox.com/users/4175915160/profile" target="_blank" rel="noopener" class="social-link roblox-link" id="headerRobloxBtn">
+                    <span class="icon">🎮</span> My Roblox
+                </a>
+                <span class="ingame-indicator">
+                    <span class="dot"></span>
+                    Ingame right now
+                </span>
+                <!-- Mobile ingame indicator (tilted, above My Roblox) -->
+                <span class="mobile-ingame">
+                    <span class="dot"></span>
+                    Ingame
+                </span>
+            </div>
+            <nav class="shop-tabs" id="shopTabs">
+                <button class="shop-tab mm2-tab active" data-shop="mm2">🔪 MM2 Items</button>
+                <button class="shop-tab" data-shop="accounts">👤 Avatar Shop</button>
+            </nav>
+        </header>
+
+        <!-- MM2 SHOP -->
+        <section class="shop-section active" id="mm2-shop">
+            <div class="shop-controls">
+                <input type="text" id="mm2Search" placeholder="🔍 Search items..." class="search-input" />
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="knife">Knives</button>
+                    <button class="filter-btn" data-filter="gun">Guns</button>
+                    <button class="filter-btn" data-filter="set">Sets</button>
+                </div>
+            </div>
+            <div class="age-warning">
+                <span class="icon">⚠️</span>
+                <div>
+                    <strong>Roblox account must be 16+</strong> to purchase gamepasses.
+                    If you're under 16, gamepasses will return a <strong>404 error</strong>.
+                    Please ensure your account age meets the requirement before paying with Robux.
+                </div>
+            </div>
+            <div class="grid-container" id="mm2Grid"></div>
+        </section>
+
+        <!-- ACCOUNTS SHOP -->
+        <section class="shop-section" id="accounts-shop">
+            <div class="age-warning">
+                <span class="icon">⚠️</span>
+                <div>
+                    <strong>Roblox account must be 16+</strong> to purchase gamepasses.
+                    If you're under 16, gamepasses will return a <strong>404 error</strong>.
+                    Please ensure your account age meets the requirement before paying with Robux.
+                </div>
+            </div>
+            <div class="grid-container" id="accountGrid"></div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            &copy; 2026 <span>Lea's Shop</span> &bull; Emo Cyber
+        </footer>
+    </div>
+
+    <!-- ===== INFO MODAL (account details) ===== -->
+    <div id="info-modal">
+        <div class="info-box">
+            <button class="info-close" id="infoClose">&times;</button>
+            <h3 id="infoTitle">Account Details</h3>
+            <div class="info-content" id="infoContent">
+                <div class="txt-loading">⏳ Loading account details...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ACCOUNT PURCHASE MODAL ===== -->
+    <div id="account-modal">
+        <div class="account-modal-box">
+            <h3>👤 Account Purchase</h3>
+            <div class="modal-item-name" id="accountModalItemName">—</div>
+
+            <!-- VIEW 1: Email Input -->
+            <div class="modal-view active" id="accountViewInput">
+                <label for="account-email">Enter your email address</label>
+                <input type="email" id="account-email" placeholder="your@email.com" autocomplete="email" />
+                <div class="bot-info" style="margin-top:14px;padding:12px 14px;border-radius:8px;background:rgba(40,40,40,0.1);border-left:3px solid #555;font-size:clamp(0.6rem,0.7vw,0.75rem);color:var(--text-secondary);line-height:1.5;text-align:left;">
+                    <strong>📧 We'll send the account details here.</strong> Please double‑check your email before continuing.
+                </div>
+                <button class="btn btn-confirm" id="accountModalContinue">Continue</button>
+            </div>
+
+            <!-- VIEW 2: Confirmation -->
+            <div class="modal-view" id="accountViewConfirm">
+                <p style="color:var(--text-secondary);text-align:center;margin-bottom:6px;">👤 Are you sure this is your email?</p>
+                <div class="confirm-box">
+                    <div class="confirm-email" id="confirmEmail">—</div>
+                    <div class="confirm-account" id="confirmAccount">—</div>
+                </div>
+                <div class="confirm-actions">
+                    <button class="btn btn-back" id="accountModalBack">✕ No, go back</button>
+                    <button class="btn btn-yes" id="accountModalConfirm">✓ Yes, that's me</button>
+                </div>
+            </div>
+
+            <!-- VIEW 3: Success -->
+            <div class="modal-view" id="accountViewSuccess">
+                <div class="modal-success">
+                    <span class="success-icon">✅</span>
+                    <h4>Purchase Request Received!</h4>
+                    <p id="accountSuccessMessage">We'll send the account details to your email shortly.</p>
+                    <div class="warning-text">
+                        <strong>⏱️ Delivery:</strong> The process may take up to <strong>1 hour maximum</strong>.<br>
+                        <strong>📧 Check your spam folder</strong> if you don't see the email in your inbox.<br>
+                        <strong>💬 DM @leaswxg</strong> on Instagram if you need help.
+                    </div>
+                    <button class="btn-close-success" id="accountModalCloseSuccess">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MM2 MODAL ===== -->
+    <div id="mm2-modal">
+        <div class="mm2-modal-box">
+            <h3>🔪 MM2 Trade</h3>
+            <div class="modal-item-name" id="mm2ModalItemName">—</div>
+            <div class="modal-view active" id="mm2ViewInput">
+                <label for="mm2-username">Enter your Roblox username</label>
+                <input type="text" id="mm2-username" placeholder="e.g. lilyfranco5" autocomplete="off" />
+                <div class="bot-info">
+                    <strong>🤖 MM2 Bot:</strong> Double‑check your username – if it's wrong, the bot won't find you. Make sure to check your friend requests as the bot will add you. Also ensure you are not at the 1,000 friends maximum, or the bot won't be able to add you.
+                </div>
+                <button class="btn btn-confirm" id="mm2ModalContinue">Continue</button>
+            </div>
+            <div class="modal-view" id="mm2ViewConfirm">
+                <p style="color:var(--text-secondary);text-align:center;margin-bottom:6px;">👤 Are you sure that's you?</p>
+                <div class="confirm-box">
+                    <div class="confirm-username" id="mm2ConfirmUsername">—</div>
+                </div>
+                <div class="confirm-actions">
+                    <button class="btn btn-back" id="mm2ModalBack">✕ No, go back</button>
+                    <button class="btn btn-yes" id="mm2ModalConfirm">✓ Yes, that's me</button>
+                </div>
+            </div>
+            <div class="modal-view" id="mm2ViewSuccess">
+                <div class="modal-success">
+                    <span class="success-icon">✅</span>
+                    <h4>Trade Request Sent!</h4>
+                    <p id="mm2SuccessMessage">The bot will add you shortly. Join a MM2 game.</p>
+                    <button class="btn-close-success" id="mm2ModalCloseSuccess">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  CONFIG
+        // ================================================================
+        const PAYPAL_URL = 'https://www.paypal.me/eliasalvada';
+        const INSTAGRAM_URL = 'https://www.instagram.com/leaswxg/';
+        const WEBHOOK_URL = 'https://ptb.discord.com/api/webhooks/1527376153814503666/vRd1UzCiL4xr9aoLJ7Axok38_gk8Y9C0HvuFtiz6XseO86z97284__QH-_0WErBBwT6O';
+
+        // ================================================================
+        //  DATA — MM2 ITEMS WITH ITEM‑SPECIFIC REVIEWS
+        // ================================================================
+
+        const mm2Items = [
+            {
+                name: 'GingerScope',
+                price: 180,
+                img: 'picture_gingerscope.png',
+                badge: '🔫 Ancient Gun',
+                type: 'gun',
+                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
+                reviews: [
+                    "OMG THANKSS FOR THE GINGER I THOUGHT I WAS GONA GET SCAMMED",
+                    "GingerScope is my new fav, thanks Lea! 🔥",
+                    "Finally got the GingerScope, it's insane!",
+                    "Best purchase ever, the GingerScope is so cool."
+                ]
+            },
+            {
+                name: "Traveler's Axe",
+                price: 72,
+                img: 'picture_travelersaxe.png',
+                badge: '🪓 Traveler',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1914998289/5800',
+                reviews: [
+                    "Traveler's Axe is rare, glad I bought it.",
+                    "Love the Traveler's Axe, so clean!",
+                    "Axe is amazing, worth every penny.",
+                    "Best knife in my collection, thanks!"
+                ]
+            },
+            {
+                name: 'Xeno Set',
+                price: 43,
+                img: 'picture_xeno.png',
+                badge: '👾 Xeno',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915616292/3400',
+                reviews: [
+                    "MY FAVV SETTT THXXX I GOT IT",
+                    "Xeno Set looks epic, instantly delivered.",
+                    "The Xeno Set is so cool, love the colors!",
+                    "Set is fire, thank you!"
+                ]
+            },
+            {
+                name: 'Sweet Treat Bundle',
+                price: 34,
+                img: 'picture_sweetbundle.png',
+                badge: '🍬 Sweets',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915022302/2700',
+                reviews: [
+                    "Sweet Treat Bundle is so cute, love it!",
+                    "Omg the bundle is adorable, thanks!",
+                    "Best bundle ever, so sweet! 🍬",
+                    "Got the bundle, it's perfect!"
+                ]
+            },
+            {
+                name: 'Harvester',
+                price: 7,
+                img: 'picture_harvester.png',
+                badge: '🌾 Harvest',
+                type: 'gun',
+                robuxLink: 'https://www.roblox.com/game-pass/1915784287/560',
+                reviews: [
+                    "Harvester is so underrated, love it!",
+                    "Great value, the Harvester is awesome.",
+                    "Harvester is my go-to gun now.",
+                    "So cheap but so good, thanks!"
+                ]
+            },
+            {
+                name: 'Raygun',
+                price: 23,
+                img: 'picture_raygun.png',
+                badge: '🔫 Raygun',
+                type: 'gun',
+                robuxLink: 'https://www.roblox.com/game-pass/1918094250/1800',
+                reviews: [
+                    "Raygun is powerful, great value!",
+                    "Love the Raygun, it's so fun to use.",
+                    "Raygun is a classic, glad I got it.",
+                    "Awesome gun, thanks Lea!"
+                ]
+            },
+            {
+                name: 'Chroma Heart Wand',
+                price: 135,
+                img: 'picture_chromaheartwand.png',
+                badge: '❤️ Chroma',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1916084294/10800',
+                reviews: [
+                    "Chroma Heart Wand is beautiful, my son loves it.",
+                    "So pretty, I can't stop staring at it!",
+                    "Chroma Heart Wand is my favorite knife.",
+                    "Totally worth it, amazing quality."
+                ]
+            },
+            {
+                name: 'Rainbow Set',
+                price: 24,
+                img: 'picture_rainbow.png',
+                badge: '🌈 Rainbow',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1918022255/1900',
+                reviews: [
+                    "Rainbow Set looks amazing, instant delivery!",
+                    "I love the Rainbow Set, so colorful.",
+                    "Best set for rainbow lovers!",
+                    "Got the set, it's perfect."
+                ]
+            },
+            {
+                name: "Vampire's Set 2024",
+                price: 42,
+                img: 'picture_vampire.png',
+                badge: '🧛 Vampire',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400',
+                reviews: [
+                    "Vampire Set is sick, totally worth it.",
+                    "The Vampire Set is so cool, love the theme.",
+                    "Best halloween set ever!",
+                    "Thanks for the Vampire Set, it's awesome."
+                ]
+            },
+            {
+                name: 'Soul Set',
+                price: 18,
+                img: 'picture_soul.png',
+                badge: '👻 Soul',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1918142251/1400',
+                reviews: [
+                    "Soul Set is hauntingly beautiful, thanks!",
+                    "Love the Soul Set, so spooky.",
+                    "Great set, very unique.",
+                    "Got the Soul Set, it's fire."
+                ]
+            },
+            {
+                name: "Traveler's Set",
+                price: 133,
+                img: 'picture_traveler.png',
+                badge: '🗺️ Traveler',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1916384287/10600',
+                reviews: [
+                    "Traveler's Set is epic, love the axe and gun combo.",
+                    "The Set is huge, so many items!",
+                    "Best set for collectors, thanks Lea!",
+                    "Traveler's Set is a must-have."
+                ]
+            },
+            {
+                name: 'Sakura Set',
+                price: 73,
+                img: 'picture_sakura.png',
+                badge: '🌸 Sakura',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1916030282/5800',
+                reviews: [
+                    "Sakura Set is gorgeous, my new favorite!",
+                    "The Sakura Set is so pretty, love the pink.",
+                    "Best cherry blossom set ever.",
+                    "Thanks for the Sakura Set, it's beautiful."
+                ]
+            },
+            {
+                name: 'Evergreen Knife',
+                price: 72,
+                img: 'picture_evergreen.png',
+                badge: '🌲 Evergreen',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1918226250/5700',
+                reviews: [
+                    "Evergreen Knife is so clean, love the color.",
+                    "The Evergreen Knife is underrated.",
+                    "Best green knife, thanks!",
+                    "Got the Evergreen, it's awesome."
+                ]
+            },
+            {
+                name: 'Turkey Knife',
+                price: 70,
+                img: 'picture_turkey.png',
+                badge: '🦃 Turkey',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1915238305/5600',
+                reviews: [
+                    "Turkey Knife is underrated, great for Thanksgiving.",
+                    "The Turkey Knife is so unique, love it.",
+                    "Funny knife, but actually really cool.",
+                    "Thanks for the Turkey Knife!"
+                ]
+            },
+            {
+                name: 'Chroma Sweet Knife 2026',
+                price: 66,
+                img: 'picture_chromasweetknife.png',
+                badge: '🍭 Chroma Sweet',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1915886305/5300',
+                reviews: [
+                    "Chroma Sweet Knife 2026 is so colorful, I love it!",
+                    "The knife is beautiful, great chroma.",
+                    "Best chroma knife, thanks Lea!",
+                    "Love the colors on this one."
+                ]
+            },
+            {
+                name: 'Celestial Knife 2024',
+                price: 58,
+                img: 'picture_celestialknife.png',
+                badge: '🌙 Celestial',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600',
+                reviews: [
+                    "Celestial Knife 2024 is out of this world, thank you!",
+                    "The Celestial Knife is stunning.",
+                    "Best space-themed knife ever.",
+                    "Got the Celestial, it's amazing."
+                ]
+            },
+            {
+                name: 'Alienbeam Knife 2025',
+                price: 58,
+                img: 'picture_alienbeamknife.png',
+                badge: '👾 Alienbeam',
+                type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600',
+                reviews: [
+                    "Alienbeam Knife 2025 is so cool, instant delivery!",
+                    "The Alienbeam Knife is epic.",
+                    "Best alien knife, thanks!",
+                    "Love the design, great knife."
+                ]
+            },
+            {
+                name: 'Chroma Sweet Treat Set 2026',
+                price: 138,
+                img: 'picture_chromasweettreatset.png',
+                badge: '🍭 Chroma Sweet Set',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
+                reviews: [
+                    "Chroma Sweet Treat Set 2026 is insane, best set ever!",
+                    "The set is massive, so many items!",
+                    "Best chroma set, thank you Lea!",
+                    "I'm obsessed with this set."
+                ]
+            },
+            {
+                name: 'Celestial Set',
+                price: 135,
+                img: 'picture_celestialset.png',
+                badge: '🌙 Celestial Set',
+                type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1916084294/10800',
+                reviews: [
+                    "Celestial Set is beautiful, 100% worth it.",
+                    "The Celestial Set is out of this world!",
+                    "Best set ever, love the theme.",
+                    "Thanks for the Celestial Set, it's perfect."
+                ]
+            }
+        ];
+
+        // ================================================================
+        //  ACCOUNTS — UPDATED PRICES & ROBUX LINKS
+        // ================================================================
+
+        const accounts = [
+            {
+                id: 4545711503,
+                name: 'valilleo',
+                img: 'image1.png',
+                badge: '🌟 Premium',
+                price: 150,
+                robuxPrice: 11000,
+                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
+                infoFile: 'info1.txt'
+            },
+            {
+                id: 3319916899,
+                name: 'rgdff77',
+                img: 'image2.png',
+                badge: '🔥 Limited',
+                price: 40,
+                robuxPrice: 3400,
+                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400',
+                infoFile: 'info2.txt'
+            },
+            {
+                id: 3231506811,
+                name: 'ssjskan',
+                img: 'image3.png',
+                badge: '💎 Rare',
+                price: 120,
+                robuxPrice: 10600,
+                robuxLink: 'https://www.roblox.com/game-pass/1916384287/10600',
+                infoFile: 'info3.txt'
+            },
+            {
+                id: 913999342,
+                name: 'zhuyuan1203',
+                img: 'image4.png',
+                badge: '⚡ Elite',
+                price: 70,
+                robuxPrice: 5600,
+                robuxLink: 'https://www.roblox.com/game-pass/1915238305/5600',
+                infoFile: 'info4.txt'
+            },
+            {
+                id: 57324433,
+                name: 'bubbah09',
+                img: 'image5.png',
+                badge: '🎯 Pro',
+                price: 40,
+                robuxPrice: 3400,
+                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400',
+                infoFile: 'info5.txt'
+            },
+            {
+                id: 714316698,
+                name: 'Databank3D',
+                img: 'image6.png',
+                badge: '🌌 Cosmic',
+                price: 75,
+                robuxPrice: 5800,
+                robuxLink: 'https://www.roblox.com/game-pass/1916030282/5800',
+                infoFile: 'info6.txt'
+            },
+            {
+                id: 113018714,
+                name: 'SurelyLegaI',
+                img: 'image7.png',
+                badge: '🐍 Venom',
+                price: 50,
+                robuxPrice: 4600,
+                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600',
+                infoFile: 'info7.txt'
+            },
+            {
+                id: 560489850,
+                name: 'kaiiIlian',
+                img: 'image8.png',
+                badge: '✨ Astral',
+                price: 20,
+                robuxPrice: 1400,
+                robuxLink: 'https://www.roblox.com/game-pass/1918142251/1400',
+                infoFile: 'info8.txt'
+            }
+        ];
+
+        // ================================================================
+        //  ACCOUNT REVIEWS — HUMAN‑LIKE & MATURE (16 unique comments)
+        // ================================================================
+
+        const accountReviewTemplates = [
+            "omg i thought i got scammed but i didn't check my spam emails for the account informations, DONT FORGET TO CHECK YALL SPAMS LMFAO",
+            "it took them a while to get the account but they eventually gave me the korblox account, thanks!",
+            "OMGG THANKS FOR THE KORLBLOXXX WTHH",
+            "This is legit, got my account within 10 mins! 🔥",
+            "Best shop ever, bought 2 accounts already, both perfect.",
+            "Amazing service, instant delivery and great communication. 10/10 would recommend.",
+            "I was skeptical at first but everything went smoothly. Thanks!",
+            "THANKS FOR THE ACC IT HAS BUNCH OF LIMITEDS, but the thing is i need roblox plus or premium to trade myself ughh THNAKS THOO",
+            "YOO I GOT ITT OMG THERES NO 2FA?? UR THE GOATT BROO",
+            "Got the account with no issues, all items included. Perfection.",
+            "Honestly the best roblox shop out there, don't sleep on this.",
+            "Quick response, and the account is even better than I expected.",
+            "Headless account is fire, everything works perfect.",
+            "Korblox account is insane, 100% legit.",
+            "YOOO THX LEAAA I GOT IT OGMSKGMKM",
+            "Account is stacked, very happy with my purchase."
+        ];
+
+        // ================================================================
+        //  DISTRIBUTE REVIEWS UNIQUELY ACROSS ACCOUNTS
+        // ================================================================
+
+        function distributeReviews(templates, accountCount) {
+            const shuffled = [...templates].sort(() => Math.random() - 0.5);
+            const distribution = [];
+            let remaining = templates.length;
+
+            const counts = [];
+            for (let i = 0; i < accountCount - 1; i++) {
+                const max = Math.min(4, remaining - (accountCount - i - 1));
+                const min = 1;
+                const count = Math.floor(Math.random() * (max - min + 1)) + min;
+                counts.push(count);
+                remaining -= count;
+            }
+            counts.push(remaining);
+
+            let start = 0;
+            for (let i = 0; i < accountCount; i++) {
+                distribution.push(shuffled.slice(start, start + counts[i]));
+                start += counts[i];
+            }
+            return distribution;
+        }
+
+        const reviewDistribution = distributeReviews(accountReviewTemplates, accounts.length);
+
+        // ================================================================
+        //  LIVE FEED — with REAL prices
+        // ================================================================
+
+        const feedContainer = document.getElementById('feed-items');
+        const flags = ['🇺🇸', '🇬🇧', '🇨🇦', '🇦🇺', '🇩🇪', '🇫🇷', '🇯🇵', '🇰🇷', '🇧🇷', '🇮🇳', '🇮🇹', '🇪🇸', '🇲🇽', '🇳🇱', '🇸🇪', '🇳🇴', '🇩🇰', '🇫🇮', '🇵🇱', '🇷🇺'];
+
+        function randomUser() {
+            const flag = flags[Math.floor(Math.random() * flags.length)];
+            const num = Math.floor(Math.random() * 10000);
+            return `${flag} ${num}`;
+        }
+
+        function buildFeedItems() {
+            const items = [];
+            mm2Items.forEach(item => {
+                items.push({ name: item.name, priceUSD: item.price });
+            });
+            const accountNames = ['Headless account', 'Korblox account', 'Limited account', 'Rare account', 'Premium account', 'Elite account', 'Astral account'];
+            accountNames.forEach(name => {
+                const price = 50 + Math.floor(Math.random() * 150);
+                items.push({ name: name, priceUSD: price });
+            });
+            return items;
+        }
+
+        const feedItemsList = buildFeedItems();
+        const CAD_RATE = 1.38;
+
+        function randomPurchase() {
+            const item = feedItemsList[Math.floor(Math.random() * feedItemsList.length)];
+            const isUSD = Math.random() > 0.5;
+            const price = isUSD ? item.priceUSD : Math.round(item.priceUSD * CAD_RATE);
+            const currency = isUSD ? 'usd' : 'cad';
+            const user = randomUser();
+            return { user, item: item.name, price, currency };
+        }
+
+        function addFeedItem() {
+            const { user, item, price, currency } = randomPurchase();
+            const div = document.createElement('div');
+            div.className = 'feed-item';
+            div.innerHTML = `
+                    <span class="user">${user}</span>
+                    <span class="action">bought</span>
+                    <span class="item">${item}</span>
+                    <span class="price">$${price} ${currency.toUpperCase()}</span>
+                    <span class="time">just now</span>
+                `;
+            feedContainer.prepend(div);
+            while (feedContainer.children.length > 8) {
+                feedContainer.removeChild(feedContainer.lastChild);
+            }
+        }
+
+        for (let i = 0; i < 3; i++) setTimeout(addFeedItem, i * 200);
+        setInterval(addFeedItem, 30000 + Math.floor(Math.random() * 5000));
+
+        // ================================================================
+        //  REVIEW GENERATORS
+        // ================================================================
+
+        function generateAccountReviews(reviewTexts) {
+            return reviewTexts.map(text => {
+                const user = randomUser();
+                const stars = 4 + Math.floor(Math.random() * 2);
+                return { user, text, stars };
+            });
+        }
+
+        function generateItemReviews(itemReviews, count) {
+            const shuffled = [...itemReviews].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, count);
+            return selected.map(text => {
+                const user = randomUser();
+                const stars = 4 + Math.floor(Math.random() * 2);
+                return { user, text, stars };
+            });
+        }
+
+        // ================================================================
+        //  MATRIX RAIN
+        // ================================================================
+        (function initMatrix() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h, columns, drops = [];
+            const chars = '01';
+            const fontSize = 28;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                columns = Math.floor(w / fontSize);
+                drops = Array(columns).fill(0).map(() => Math.floor(Math.random() * -50));
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            let frameCount = 0;
+
+            function draw() {
+                frameCount++;
+                if (frameCount % 3 === 0) {
+                    ctx.fillStyle = 'rgba(15, 15, 18, 0.04)';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
+                    ctx.textAlign = 'center';
+                    for (let i = 0; i < drops.length; i++) {
+                        const char = chars[Math.floor(Math.random() * chars.length)];
+                        const x = i * fontSize + fontSize / 2;
+                        const y = drops[i] * fontSize;
+                        const alpha = Math.min(0.3, 0.05 + Math.abs(drops[i] / 60) * 0.2);
+                        ctx.fillStyle = `rgba(150,150,150,${alpha})`;
+                        ctx.fillText(char, x, y);
+                        drops[i] += 0.4;
+                        if (drops[i] * fontSize > h + 20 && Math.random() > 0.97) {
+                            drops[i] = 0;
+                        }
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        // ================================================================
+        //  WEBHOOK SENDERS
+        // ================================================================
+
+        // MM2 Webhook
+        async function sendMM2Webhook(username, itemName) {
+            const embed = {
+                title: '🎯 New MM2 Trade Request',
+                color: 0x666666,
+                fields: [
+                    { name: 'Username', value: username, inline: true },
+                    { name: 'Item', value: itemName, inline: true }
+                ],
+                thumbnail: { url: 'https://www.roblox.com/favicon.ico' },
+                footer: { text: 'Lea\'s Shop · Emo Cyber', icon_url: 'https://www.roblox.com/favicon.ico' },
+                timestamp: new Date().toISOString()
+            };
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                });
+                return true;
+            } catch (e) {
+                console.error('MM2 Webhook error:', e);
+                return false;
+            }
+        }
+
+        // Account Webhook
+        async function sendAccountWebhook(accountName, accountId, email) {
+            const embed = {
+                title: '👤 New Account Purchase Request',
+                color: 0x666666,
+                fields: [
+                    { name: 'Account', value: `${accountName} (ID: ${accountId})`, inline: true },
+                    { name: 'Email', value: email, inline: true }
+                ],
+                thumbnail: { url: 'https://www.roblox.com/favicon.ico' },
+                footer: { text: 'Lea\'s Shop · Emo Cyber — Send account details to the email above', icon_url: 'https://www.roblox.com/favicon.ico' },
+                timestamp: new Date().toISOString()
+            };
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                });
+                return true;
+            } catch (e) {
+                console.error('Account Webhook error:', e);
+                return false;
+            }
+        }
+
+        // ================================================================
+        //  ANIMATION — INTRO "MY ROBLOX" ZOOM-OUT (no link open)
+        // ================================================================
+
+        function animateIntroRobloxButton() {
+            const introBtn = document.getElementById('introRobloxBtn');
+            const headerBtn = document.getElementById('headerRobloxBtn');
+            const introOverlay = document.getElementById('intro-overlay');
+            const introButtons = document.getElementById('introButtons');
+
+            if (!introBtn || !headerBtn || !introOverlay) return;
+
+            const introRect = introBtn.getBoundingClientRect();
+            const headerRect = headerBtn.getBoundingClientRect();
+
+            const mm2Btn = document.getElementById('intro-mm2');
+            const accBtn = document.getElementById('intro-accounts');
+            if (mm2Btn) mm2Btn.classList.add('hide-btn');
+            if (accBtn) accBtn.classList.add('hide-btn');
+
+            introBtn.style.transition = 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            introBtn.style.position = 'fixed';
+            introBtn.style.top = introRect.top + 'px';
+            introBtn.style.left = introRect.left + 'px';
+            introBtn.style.width = introRect.width + 'px';
+            introBtn.style.height = introRect.height + 'px';
+            introBtn.style.margin = '0';
+            introBtn.style.zIndex = '2000';
+            introBtn.style.animation = 'none';
+            introBtn.classList.add('flying');
+
+            void introBtn.offsetWidth;
+
+            introBtn.style.top = headerRect.top + 'px';
+            introBtn.style.left = headerRect.left + 'px';
+            introBtn.style.width = headerRect.width + 'px';
+            introBtn.style.height = headerRect.height + 'px';
+            introBtn.style.fontSize = window.getComputedStyle(headerBtn).fontSize;
+            introBtn.style.padding = window.getComputedStyle(headerBtn).padding;
+            introBtn.style.borderRadius = window.getComputedStyle(headerBtn).borderRadius;
+            introBtn.style.minWidth = 'auto';
+            introBtn.style.background = window.getComputedStyle(headerBtn).background;
+
+            setTimeout(() => {
+                introOverlay.classList.add('fade-out');
+            }, 500);
+
+            setTimeout(() => {
+                headerBtn.classList.add('glow-header');
+                introBtn.style.display = 'none';
+                introBtn.style.position = '';
+                introBtn.style.top = '';
+                introBtn.style.left = '';
+                introBtn.style.width = '';
+                introBtn.style.height = '';
+                introBtn.style.margin = '';
+                introBtn.style.zIndex = '';
+                introBtn.style.fontSize = '';
+                introBtn.style.padding = '';
+                introBtn.style.borderRadius = '';
+                introBtn.style.minWidth = '';
+                introBtn.style.background = '';
+                introBtn.classList.remove('flying');
+
+                setTimeout(() => {
+                    headerBtn.classList.remove('glow-header');
+                    if (mm2Btn) mm2Btn.classList.remove('hide-btn');
+                    if (accBtn) accBtn.classList.remove('hide-btn');
+                    introOverlay.classList.remove('fade-out');
+                    introOverlay.style.display = 'none';
+                }, 1300);
+            }, 1300);
+        }
+
+        // ================================================================
+        //  LIVE FEED TOGGLE (minimize/expand)
+        // ================================================================
+
+        const feedToggle = document.getElementById('feedToggle');
+        const feedWrapper = document.getElementById('feedItemsWrapper');
+        let feedVisible = true;
+
+        feedToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            feedVisible = !feedVisible;
+            feedWrapper.classList.toggle('hidden', !feedVisible);
+            this.classList.toggle('minimized', !feedVisible);
+            this.textContent = feedVisible ? '▼' : '▲';
+        });
+
+        // ================================================================
+        //  RENDER FUNCTIONS
+        // ================================================================
+
+        function renderAccounts() {
+            const grid = document.getElementById('accountGrid');
+            grid.innerHTML = '';
+            accounts.forEach((acc, idx) => {
+                const reviewTexts = reviewDistribution[idx] || [];
+                const reviews = generateAccountReviews(reviewTexts);
+                const card = document.createElement('div');
+                card.className = 'account-card';
+                card.innerHTML = `
+                        <div class="profile-wrap">
+                            <div class="glow-ring"></div>
+                            <div class="glow-ring secondary"></div>
+                            <img src="${acc.img}" alt="${acc.name}" loading="lazy" />
+                        </div>
+                        <div class="card-title">${acc.name}</div>
+                        <div class="card-sub">#${acc.id}</div>
+                        <div class="card-badge">${acc.badge}</div>
+                        <div class="card-actions">
+                            <div class="btn-row">
+                                <a href="https://www.roblox.com/users/${acc.id}/profile" target="_blank" rel="noopener noreferrer" class="btn btn-profile">
+                                    <span class="icon">👤</span> Open Profile
+                                </a>
+                                <button class="btn btn-info" data-index="${idx}">
+                                    <span class="icon">ℹ️</span> Info
+                                </button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-buy account-buy-trigger" data-index="${idx}" data-method="paypal">
+                                    <span class="icon">🛒</span> Buy Now ($${acc.price})
+                                </button>
+                                <button class="btn btn-robux account-buy-trigger" data-index="${idx}" data-method="robux">
+                                    <span class="icon">💰</span> Pay with Robux (${acc.robuxPrice})
+                                </button>
+                            </div>
+                            <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer" class="btn btn-dm">
+                                <span class="icon">💬</span> DM me for help
+                            </a>
+                        </div>
+                        <div class="reviews">
+                            ${reviews.map(r => `
+                                <div class="review-item">
+                                    <div>
+                                        <span class="review-user">${r.user}</span>
+                                        <span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
+                                    </div>
+                                    <span class="review-text">"${r.text}"</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                const infoBtn = card.querySelector('.btn-info');
+                infoBtn.addEventListener('click', () => openInfoModal(idx));
+                const buyBtns = card.querySelectorAll('.account-buy-trigger');
+                buyBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const method = e.currentTarget.dataset.method;
+                        openAccountModal(acc, method);
+                    });
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function renderMM2() {
+            const grid = document.getElementById('mm2Grid');
+            grid.innerHTML = '';
+            mm2Items.forEach((item, index) => {
+                const reviewCount = 2 + Math.floor(Math.random() * 2);
+                const reviews = generateItemReviews(item.reviews, reviewCount);
+                const card = document.createElement('div');
+                card.className = 'mm2-card';
+                card.dataset.name = item.name.toLowerCase();
+                card.dataset.type = item.type;
+
+                let actionsHtml = `
+                        <button class="btn btn-buy mm2-buy-trigger" data-index="${index}" data-method="paypal">
+                            <span class="icon">🛒</span> Buy Now ($${item.price})
+                        </button>
+                    `;
+                if (item.robuxLink) {
+                    actionsHtml += `
+                            <button class="btn btn-robux mm2-buy-trigger" data-index="${index}" data-method="robux">
+                                <span class="icon">💰</span> Pay with Robux
+                            </button>
+                        `;
+                }
+
+                card.innerHTML = `
+                        <div class="profile-wrap">
+                            <div class="glow-ring"></div>
+                            <div class="glow-ring secondary"></div>
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" />
+                        </div>
+                        <div class="card-title">${item.name}</div>
+                        <div class="card-sub price-green">$${item.price}</div>
+                        <div class="card-badge">${item.badge}</div>
+                        <div class="click-hint">✦ click to trade ✦</div>
+                        <div class="card-actions">
+                            ${actionsHtml}
+                        </div>
+                        <div class="reviews">
+                            ${reviews.map(r => `
+                                <div class="review-item">
+                                    <div>
+                                        <span class="review-user">${r.user}</span>
+                                        <span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
+                                    </div>
+                                    <span class="review-text">"${r.text}"</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.card-actions') || e.target.closest('.btn')) return;
+                    openMM2Modal(item);
+                });
+
+                const buyBtns = card.querySelectorAll('.mm2-buy-trigger');
+                buyBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const method = e.currentTarget.dataset.method;
+                        openMM2Modal(item, method);
+                    });
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ================================================================
+        //  SEARCH & FILTER LOGIC
+        // ================================================================
+
+        const searchInput = document.getElementById('mm2Search');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        let currentFilter = 'all';
+
+        function filterMM2() {
+            const query = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll('.mm2-card').forEach(card => {
+                const name = card.dataset.name || '';
+                const type = card.dataset.type || '';
+                const matchesSearch = name.includes(query);
+                const matchesFilter = currentFilter === 'all' || type === currentFilter;
+                card.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+            });
+        }
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                filterMM2();
+            });
+        });
+
+        searchInput.addEventListener('input', filterMM2);
+
+        // ================================================================
+        //  INFO MODAL (account details)
+        // ================================================================
+        const infoModal = document.getElementById('info-modal');
+        const infoTitle = document.getElementById('infoTitle');
+        const infoContent = document.getElementById('infoContent');
+        const infoClose = document.getElementById('infoClose');
+
+        async function openInfoModal(index) {
+            const acc = accounts[index];
+            if (!acc) return;
+            infoTitle.textContent = `👤 ${acc.name} · Details`;
+            infoContent.innerHTML = `<div class="txt-loading">⏳ Loading from ${acc.infoFile}...</div>`;
+            infoModal.classList.add('visible');
+            try {
+                const response = await fetch(acc.infoFile);
+                if (!response.ok) throw new Error(`HTTP ${response.status} — file not found`);
+                const text = await response.text();
+                if (text.trim() === '') {
+                    infoContent.innerHTML = `<div class="txt-error">⚠️ File "${acc.infoFile}" is empty.</div>`;
+                } else {
+                    infoContent.innerHTML = text;
+                }
+            } catch (err) {
+                let hint = '';
+                if (window.location.protocol === 'file:') {
+                    hint = `
+                            <div class="hint">
+                                💡 <strong>You're using the file:// protocol.</strong><br>
+                                Modern browsers block loading local files via fetch.<br>
+                                <strong>Fix:</strong> Use a local development server (e.g., VS Code <code>Live Server</code> extension, or Python <code>http.server</code>).<br>
+                                Then reopen this page via <code>http://</code> and the .txt files will load correctly.
+                            </div>
+                        `;
+                } else {
+                    hint = `
+                            <div class="hint">
+                                💡 <strong>Possible reasons:</strong><br>
+                                • File "${acc.infoFile}" is missing from the folder.<br>
+                                • The filename is case‑sensitive – check the spelling.<br>
+                                • The file is not in the same directory as this HTML.
+                            </div>
+                        `;
+                }
+                infoContent.innerHTML = `
+                        <div class="txt-error">
+                            ❌ Could not load <strong>${acc.infoFile}</strong><br>
+                            <span style="font-size:0.8rem;color:#886666;">${err.message}</span>
+                            ${hint}
+                        </div>
+                    `;
+            }
+        }
+
+        function closeInfoModal() {
+            infoModal.classList.remove('visible');
+        }
+        infoClose.addEventListener('click', closeInfoModal);
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) closeInfoModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeInfoModal();
+        });
+
+        // ================================================================
+        //  ACCOUNT PURCHASE MODAL (supports PayPal & Robux)
+        // ================================================================
+
+        const accountModal = document.getElementById('account-modal');
+        const accountModalItemName = document.getElementById('accountModalItemName');
+        const accountEmailInput = document.getElementById('account-email');
+        const accountModalContinue = document.getElementById('accountModalContinue');
+        const accountModalBack = document.getElementById('accountModalBack');
+        const accountModalConfirm = document.getElementById('accountModalConfirm');
+        const accountModalCloseSuccess = document.getElementById('accountModalCloseSuccess');
+        const confirmEmail = document.getElementById('confirmEmail');
+        const confirmAccount = document.getElementById('confirmAccount');
+        const accountSuccessMessage = document.getElementById('accountSuccessMessage');
+
+        let currentAccount = null;
+        let currentAccountEmail = '';
+        let currentPaymentMethod = 'paypal';
+
+        function showAccountView(viewId) {
+            document.querySelectorAll('#account-modal .modal-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function openAccountModal(account, method) {
+            currentAccount = account;
+            currentAccountEmail = '';
+            currentPaymentMethod = method || 'paypal';
+            accountModalItemName.textContent = `${account.name} · #${account.id}`;
+            accountEmailInput.value = '';
+            accountEmailInput.style.borderColor = '';
+            confirmEmail.textContent = '—';
+            confirmAccount.textContent = '';
+            accountModalConfirm.disabled = false;
+            accountModalConfirm.textContent = '✓ Yes, that\'s me';
+            showAccountView('accountViewInput');
+            accountModal.classList.add('visible');
+            setTimeout(() => accountEmailInput.focus(), 120);
+        }
+
+        function closeAccountModal() {
+            accountModal.classList.remove('visible');
+            currentAccount = null;
+            currentAccountEmail = '';
+        }
+
+        accountModalContinue.addEventListener('click', () => {
+            const email = accountEmailInput.value.trim();
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                accountEmailInput.style.borderColor = '#664444';
+                accountEmailInput.placeholder = '⚠️ Please enter a valid email';
+                setTimeout(() => {
+                    accountEmailInput.style.borderColor = '';
+                    accountEmailInput.placeholder = 'your@email.com';
+                }, 2000);
+                return;
+            }
+            currentAccountEmail = email;
+            confirmEmail.textContent = email;
+            confirmAccount.textContent = `Account: ${currentAccount.name} (ID: ${currentAccount.id})`;
+            showAccountView('accountViewConfirm');
+        });
+
+        accountModalBack.addEventListener('click', () => {
+            showAccountView('accountViewInput');
+            accountEmailInput.focus();
+        });
+
+        accountModalConfirm.addEventListener('click', async () => {
+            if (!currentAccountEmail || !currentAccount) return;
+            accountModalConfirm.disabled = true;
+            accountModalConfirm.textContent = '⏳ Sending...';
+
+            const webhookOk = await sendAccountWebhook(currentAccount.name, currentAccount.id, currentAccountEmail);
+
+            if (currentPaymentMethod === 'paypal') {
+                window.open(PAYPAL_URL, '_blank');
+            } else if (currentPaymentMethod === 'robux') {
+                window.open(currentAccount.robuxLink, '_blank');
+            }
+
+            if (webhookOk) {
+                accountSuccessMessage.textContent = `✅ We've received your purchase request for "${currentAccount.name}". We'll send the account details to ${currentAccountEmail} shortly.`;
+            } else {
+                accountSuccessMessage.textContent =
+                    `⚠️ Webhook failed, but the payment page is open. Please DM @leaswxg with your email "${currentAccountEmail}" and account "${currentAccount.name}".`;
+            }
+            showAccountView('accountViewSuccess');
+            accountModalConfirm.disabled = false;
+            accountModalConfirm.textContent = '✓ Yes, that\'s me';
+        });
+
+        accountModalCloseSuccess.addEventListener('click', closeAccountModal);
+        accountModal.addEventListener('click', (e) => {
+            if (e.target === accountModal) closeAccountModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAccountModal();
+        });
+
+        // ================================================================
+        //  MM2 MODAL (supports PayPal & Robux with webhook)
+        // ================================================================
+
+        const mm2Modal = document.getElementById('mm2-modal');
+        const mm2ModalItemName = document.getElementById('mm2ModalItemName');
+        const mm2Input = document.getElementById('mm2-username');
+        const mm2ModalContinue = document.getElementById('mm2ModalContinue');
+        const mm2ModalBack = document.getElementById('mm2ModalBack');
+        const mm2ModalConfirm = document.getElementById('mm2ModalConfirm');
+        const mm2ModalCloseSuccess = document.getElementById('mm2ModalCloseSuccess');
+        const mm2ConfirmUsername = document.getElementById('mm2ConfirmUsername');
+        const mm2SuccessMessage = document.getElementById('mm2SuccessMessage');
+
+        let currentMM2Item = null;
+        let currentMM2Username = '';
+        let currentMM2Method = 'paypal';
+
+        function showMM2View(viewId) {
+            document.querySelectorAll('#mm2-modal .modal-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function openMM2Modal(item, method) {
+            currentMM2Item = item;
+            currentMM2Username = '';
+            currentMM2Method = method || 'paypal';
+            mm2ModalItemName.textContent = `${item.name} · $${item.price}`;
+            mm2Input.value = '';
+            mm2Input.style.borderColor = '';
+            mm2ConfirmUsername.textContent = '—';
+            mm2ModalConfirm.disabled = false;
+            mm2ModalConfirm.textContent = '✓ Yes, that\'s me';
+            showMM2View('mm2ViewInput');
+            mm2Modal.classList.add('visible');
+            setTimeout(() => mm2Input.focus(), 120);
+        }
+
+        function closeMM2Modal() {
+            mm2Modal.classList.remove('visible');
+            currentMM2Item = null;
+            currentMM2Username = '';
+        }
+
+        mm2ModalContinue.addEventListener('click', () => {
+            const username = mm2Input.value.trim();
+            if (!username) {
+                mm2Input.style.borderColor = '#664444';
+                mm2Input.placeholder = '⚠️ Please enter a username';
+                setTimeout(() => {
+                    mm2Input.style.borderColor = '';
+                    mm2Input.placeholder = 'e.g. lilyfranco5';
+                }, 2000);
+                return;
+            }
+            currentMM2Username = username;
+            mm2ConfirmUsername.textContent = username;
+            showMM2View('mm2ViewConfirm');
+        });
+
+        mm2ModalBack.addEventListener('click', () => {
+            showMM2View('mm2ViewInput');
+            mm2Input.focus();
+        });
+
+        mm2ModalConfirm.addEventListener('click', async () => {
+            if (!currentMM2Username || !currentMM2Item) return;
+            mm2ModalConfirm.disabled = true;
+            mm2ModalConfirm.textContent = '⏳ Sending...';
+
+            const webhookOk = await sendMM2Webhook(currentMM2Username, currentMM2Item.name);
+
+            if (currentMM2Method === 'paypal') {
+                window.open(PAYPAL_URL, '_blank');
+            } else if (currentMM2Method === 'robux' && currentMM2Item.robuxLink) {
+                window.open(currentMM2Item.robuxLink, '_blank');
+            }
+
+            if (webhookOk) {
+                mm2SuccessMessage.textContent =
+                    `✅ The bot has been notified! "${currentMM2Username}" will be added shortly. Join a MM2 game.`;
+            } else {
+                mm2SuccessMessage.textContent =
+                    `⚠️ Webhook failed, but the payment page is open. DM @leaswxg with "${currentMM2Username}".`;
+            }
+            showMM2View('mm2ViewSuccess');
+            mm2ModalConfirm.disabled = false;
+            mm2ModalConfirm.textContent = '✓ Yes, that\'s me';
+        });
+
+        mm2ModalCloseSuccess.addEventListener('click', closeMM2Modal);
+        mm2Modal.addEventListener('click', (e) => {
+            if (e.target === mm2Modal) closeMM2Modal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMM2Modal();
+        });
+
+        // ================================================================
+        //  INTRO + TABS
+        // ================================================================
+
+        const introOverlay = document.getElementById('intro-overlay');
+        const introMm2 = document.getElementById('intro-mm2');
+        const introAccounts = document.getElementById('intro-accounts');
+
+        const introRobloxBtn = document.getElementById('introRobloxBtn');
+        if (introRobloxBtn) {
+            introRobloxBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                animateIntroRobloxButton();
+            });
+        }
+
+        function showShop(shop) {
+            introOverlay.classList.remove('visible');
+            document.querySelectorAll('.shop-tab').forEach(tab => tab.classList.remove('active'));
+            const targetTab = document.querySelector(`.shop-tab[data-shop="${shop}"]`);
+            if (targetTab) targetTab.classList.add('active');
+            document.getElementById('mm2-shop').classList.toggle('active', shop === 'mm2');
+            document.getElementById('accounts-shop').classList.toggle('active', shop === 'accounts');
+            if (shop === 'mm2') setTimeout(filterMM2, 100);
+        }
+
+        introMm2.addEventListener('click', () => showShop('mm2'));
+        introAccounts.addEventListener('click', () => showShop('accounts'));
+
+        document.querySelectorAll('.shop-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const shop = this.dataset.shop;
+                if (introOverlay.classList.contains('visible')) introOverlay.classList.remove('visible');
+                showShop(shop);
+            });
+        });
+
+        // ================================================================
+        //  LOADING SCREEN
+        // ================================================================
+
+        (function initLoading() {
+            const loading = document.getElementById('loading-screen');
+            loading.classList.remove('hidden');
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                setTimeout(() => introOverlay.classList.add('visible'), 200);
+            }, 1500);
+            setTimeout(() => {
+                if (!loading.classList.contains('hidden')) {
+                    loading.classList.add('hidden');
+                    introOverlay.classList.add('visible');
+                }
+            }, 2200);
+        })();
+
+        // ================================================================
+        //  RENDER
+        // ================================================================
+
+        renderMM2();
+        renderAccounts();
+
+        console.log('⚫ Lea\'s Shop · Emo Cyber (webhook fixed, mobile improved)');
+        console.log(`📦 ${accounts.length} accounts, ${mm2Items.length} MM2 items`);
+        console.log('💳 PayPal: @eliasalvada');
+        console.log('📷 Instagram: @leaswxg');
+        console.log('🔗 Webhook URL:', WEBHOOK_URL);
+        if (window.location.protocol === 'file:') {
+            console.warn('⚠️ file:// protocol detected – .txt files will not load. Use a local server.');
+        }
+    </script>
+
+</body>
+</html>
